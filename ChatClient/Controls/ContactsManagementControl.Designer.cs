@@ -30,12 +30,11 @@
         {
             label1 = new Label();
             txtSearch = new TextBox();
-            btnSearch = new Button();
             panel1 = new Panel();
+            btnAdd = new Button();
             btnBlock = new Button();
             btnDelete = new Button();
             btnEdit = new Button();
-            btnAdd = new Button();
             label2 = new Label();
             lvContacts = new ListView();
             panel1.SuspendLayout();
@@ -54,18 +53,9 @@
             // 
             txtSearch.Location = new Point(14, 24);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(134, 23);
+            txtSearch.Size = new Size(169, 23);
             txtSearch.TabIndex = 8;
-            // 
-            // btnSearch
-            // 
-            btnSearch.BackgroundImageLayout = ImageLayout.Zoom;
-            btnSearch.Image = Properties.Resources.magnifying_glass;
-            btnSearch.Location = new Point(154, 18);
-            btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(31, 29);
-            btnSearch.TabIndex = 7;
-            btnSearch.UseVisualStyleBackColor = true;
+            txtSearch.TextChanged += txtSearchContact_TextChanged;
             // 
             // panel1
             // 
@@ -76,39 +66,11 @@
             panel1.Controls.Add(btnEdit);
             panel1.Controls.Add(txtSearch);
             panel1.Controls.Add(label1);
-            panel1.Controls.Add(btnSearch);
             panel1.Dock = DockStyle.Right;
             panel1.Location = new Point(398, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(200, 450);
             panel1.TabIndex = 10;
-            // 
-            // btnBlock
-            // 
-            btnBlock.Location = new Point(3, 410);
-            btnBlock.Name = "btnBlock";
-            btnBlock.Size = new Size(192, 35);
-            btnBlock.TabIndex = 12;
-            btnBlock.Text = "Block 🚫";
-            btnBlock.UseVisualStyleBackColor = true;
-            // 
-            // btnDelete
-            // 
-            btnDelete.Location = new Point(3, 369);
-            btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(192, 35);
-            btnDelete.TabIndex = 11;
-            btnDelete.Text = "Delete ❌";
-            btnDelete.UseVisualStyleBackColor = true;
-            // 
-            // btnEdit
-            // 
-            btnEdit.Location = new Point(3, 328);
-            btnEdit.Name = "btnEdit";
-            btnEdit.Size = new Size(192, 35);
-            btnEdit.TabIndex = 10;
-            btnEdit.Text = "Edit ✏️";
-            btnEdit.UseVisualStyleBackColor = true;
             // 
             // btnAdd
             // 
@@ -118,6 +80,37 @@
             btnAdd.TabIndex = 13;
             btnAdd.Text = "Add ➕";
             btnAdd.UseVisualStyleBackColor = true;
+            btnAdd.Click += btnAdd_Click;
+            // 
+            // btnBlock
+            // 
+            btnBlock.Location = new Point(3, 410);
+            btnBlock.Name = "btnBlock";
+            btnBlock.Size = new Size(192, 35);
+            btnBlock.TabIndex = 12;
+            btnBlock.Text = "Block 🚫";
+            btnBlock.UseVisualStyleBackColor = true;
+            btnBlock.Click += btnBlock_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(3, 369);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(192, 35);
+            btnDelete.TabIndex = 11;
+            btnDelete.Text = "Delete ❌";
+            btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
+            // 
+            // btnEdit
+            // 
+            btnEdit.Location = new Point(3, 328);
+            btnEdit.Name = "btnEdit";
+            btnEdit.Size = new Size(192, 35);
+            btnEdit.TabIndex = 10;
+            btnEdit.Text = "Edit ✏️";
+            btnEdit.UseVisualStyleBackColor = true;
+            btnEdit.Click += btnEdit_Click;
             // 
             // label2
             // 
@@ -158,7 +151,6 @@
 
         private Label label1;
         private TextBox txtSearch;
-        private Button btnSearch;
         private Panel panel1;
         private Button btnBlock;
         private Button btnDelete;

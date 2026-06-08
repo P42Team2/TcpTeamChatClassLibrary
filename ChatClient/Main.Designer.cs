@@ -30,13 +30,13 @@
         {
             pnlMainContent = new Panel();
             pnlSidebar = new Panel();
-            btnBlackList = new Button();
-            btnContacts = new Button();
-            lblLoggedInAs = new Label();
-            btnAccountSettings = new Button();
-            groupBox1 = new GroupBox();
             label1 = new Label();
+            btnContacts = new Button();
+            groupBox1 = new GroupBox();
             lvActiveChats = new ListView();
+            btnAccountSettings = new Button();
+            lblLoggedInAs = new Label();
+            btnBlackList = new Button();
             pnlSidebar.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -65,15 +65,14 @@
             pnlSidebar.Size = new Size(200, 450);
             pnlSidebar.TabIndex = 1;
             // 
-            // btnBlackList
+            // label1
             // 
-            btnBlackList.Location = new Point(3, 55);
-            btnBlackList.Name = "btnBlackList";
-            btnBlackList.Size = new Size(192, 24);
-            btnBlackList.TabIndex = 2;
-            btnBlackList.Text = "Black List";
-            btnBlackList.UseVisualStyleBackColor = true;
-            btnBlackList.Click += btnBlackList_Click;
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 7);
+            label1.Name = "label1";
+            label1.Size = new Size(135, 15);
+            label1.TabIndex = 5;
+            label1.Text = "Welcome to our project!";
             // 
             // btnContacts
             // 
@@ -85,14 +84,26 @@
             btnContacts.UseVisualStyleBackColor = true;
             btnContacts.Click += btnContacts_Click;
             // 
-            // lblLoggedInAs
+            // groupBox1
             // 
-            lblLoggedInAs.AutoSize = true;
-            lblLoggedInAs.Location = new Point(3, 392);
-            lblLoggedInAs.Name = "lblLoggedInAs";
-            lblLoggedInAs.Size = new Size(116, 15);
-            lblLoggedInAs.TabIndex = 0;
-            lblLoggedInAs.Text = "You are logged in as:";
+            groupBox1.Controls.Add(lvActiveChats);
+            groupBox1.Location = new Point(3, 85);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(192, 304);
+            groupBox1.TabIndex = 4;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Chats";
+            // 
+            // lvActiveChats
+            // 
+            lvActiveChats.FullRowSelect = true;
+            lvActiveChats.Location = new Point(3, 19);
+            lvActiveChats.Name = "lvActiveChats";
+            lvActiveChats.Size = new Size(186, 274);
+            lvActiveChats.TabIndex = 1;
+            lvActiveChats.UseCompatibleStateImageBehavior = false;
+            lvActiveChats.View = View.Details;
+            lvActiveChats.SelectedIndexChanged += lvActiveChats_SelectedIndexChanged;
             // 
             // btnAccountSettings
             // 
@@ -104,34 +115,24 @@
             btnAccountSettings.UseVisualStyleBackColor = true;
             btnAccountSettings.Click += btnAccountSettings_Click;
             // 
-            // groupBox1
+            // lblLoggedInAs
             // 
-            groupBox1.Controls.Add(lvActiveChats);
-            groupBox1.Location = new Point(3, 85);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(192, 304);
-            groupBox1.TabIndex = 4;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "Chats";
+            lblLoggedInAs.AutoSize = true;
+            lblLoggedInAs.Location = new Point(3, 392);
+            lblLoggedInAs.Name = "lblLoggedInAs";
+            lblLoggedInAs.Size = new Size(116, 15);
+            lblLoggedInAs.TabIndex = 0;
+            lblLoggedInAs.Text = "You are logged in as:";
             // 
-            // label1
+            // btnBlackList
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(3, 7);
-            label1.Name = "label1";
-            label1.Size = new Size(135, 15);
-            label1.TabIndex = 5;
-            label1.Text = "Welcome to our project!";
-            // 
-            // lvActiveChats
-            // 
-            lvActiveChats.FullRowSelect = true;
-            lvActiveChats.Location = new Point(3, 19);
-            lvActiveChats.Name = "lvActiveChats";
-            lvActiveChats.Size = new Size(186, 274);
-            lvActiveChats.TabIndex = 1;
-            lvActiveChats.UseCompatibleStateImageBehavior = false;
-            lvActiveChats.View = View.Details;
+            btnBlackList.Location = new Point(3, 55);
+            btnBlackList.Name = "btnBlackList";
+            btnBlackList.Size = new Size(192, 24);
+            btnBlackList.TabIndex = 2;
+            btnBlackList.Text = "Black List";
+            btnBlackList.UseVisualStyleBackColor = true;
+            btnBlackList.Click += btnBlackList_Click;
             // 
             // Main
             // 
