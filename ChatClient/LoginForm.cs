@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ChatClient.Controls;
 
 namespace ChatClient
 {
@@ -15,6 +16,34 @@ namespace ChatClient
         public LoginForm()
         {
             InitializeComponent();
+            SwitchScreen(new LogIn(this));
+        }
+
+        public void SwitchScreen(UserControl newScreen)
+        {
+            pnlLogIn.Controls.Clear();
+            newScreen.Dock = DockStyle.Fill;
+            pnlLogIn.Controls.Add(newScreen);
+        }
+
+        private void btnLogIn_Click(object sender, EventArgs e)
+        {
+            SwitchScreen(new LogIn(this));
+        }
+
+        private void btnRegister_Click(object sender, EventArgs e)
+        {
+            SwitchScreen(new Register(this));
+        }
+
+        public void OnLoginSuccess(string username, int userId)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                Main mainForm = new Main(username, userId);
+                mainForm.Show();
+                this.Hide();
+            });
         }
     }
 }
