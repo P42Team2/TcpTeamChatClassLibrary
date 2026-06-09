@@ -27,6 +27,17 @@ namespace ChatClient.Controls
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text;
 
+            // ==========================================
+            // ВРЕМЕННЫЙ КОСТЫЛЬ ДЛЯ БЫСТРОГО ТЕСТА (ОТЛАДКА)
+            // Если поля пустые — заходим автоматически как "Тестовый Юзер" со случайным ID
+            if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password))
+            {
+                // Передаем управление форме, как будто сервер ответил "ОК"
+                _parentForm.OnLoginSuccess("DevUser", 777);
+                return; // Выходим из метода, сеть дальше не трогаем!
+            }
+            // ==========================================
+
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -51,6 +62,11 @@ namespace ChatClient.Controls
                     MessageBox.Show($"Ошибка авторизации: {message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
             }
+        }
+
+        private void LogIn_Disposed(object sender, ControlEventArgs e)
+        {
+            Program.NetworkClient.OnLoginResult -= NetworkClient_OnLoginResult;
         }
     }
 }

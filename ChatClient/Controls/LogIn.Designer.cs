@@ -89,6 +89,7 @@
             Controls.Add(txtUsername);
             Name = "LogIn";
             Size = new Size(163, 129);
+            ControlRemoved += LogIn_Disposed;
             ResumeLayout(false);
             PerformLayout();
         }

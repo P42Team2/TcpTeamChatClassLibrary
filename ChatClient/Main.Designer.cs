@@ -143,6 +143,8 @@
             Controls.Add(pnlMainContent);
             Name = "Main";
             Text = "Form1";
+            FormClosed += Main_FormClosed;
+            Load += Main_Load;
             pnlSidebar.ResumeLayout(false);
             pnlSidebar.PerformLayout();
             groupBox1.ResumeLayout(false);

@@ -30,7 +30,7 @@
         {
             label1 = new Label();
             btnUnblock = new Button();
-            lvBlockedUsers = new ListView();
+            lvBlacklist = new ListView();
             SuspendLayout();
             // 
             // label1
@@ -51,26 +51,28 @@
             btnUnblock.TabIndex = 12;
             btnUnblock.Text = "Unblock";
             btnUnblock.UseVisualStyleBackColor = true;
+            btnUnblock.Click += btnUnblock_Click;
             // 
-            // lvBlockedUsers
+            // lvBlacklist
             // 
-            lvBlockedUsers.FullRowSelect = true;
-            lvBlockedUsers.Location = new Point(13, 37);
-            lvBlockedUsers.Name = "lvBlockedUsers";
-            lvBlockedUsers.Size = new Size(570, 364);
-            lvBlockedUsers.TabIndex = 13;
-            lvBlockedUsers.UseCompatibleStateImageBehavior = false;
-            lvBlockedUsers.View = View.Details;
+            lvBlacklist.FullRowSelect = true;
+            lvBlacklist.Location = new Point(13, 37);
+            lvBlacklist.Name = "lvBlacklist";
+            lvBlacklist.Size = new Size(570, 364);
+            lvBlacklist.TabIndex = 13;
+            lvBlacklist.UseCompatibleStateImageBehavior = false;
+            lvBlacklist.View = View.Details;
             // 
             // BlacklistControl
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(lvBlockedUsers);
+            Controls.Add(lvBlacklist);
             Controls.Add(btnUnblock);
             Controls.Add(label1);
             Name = "BlacklistControl";
             Size = new Size(598, 450);
+            ControlRemoved += Control_Disposed;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -79,6 +81,6 @@
 
         private Label label1;
         private Button btnUnblock;
-        private ListView lvBlockedUsers;
+        private ListView lvBlacklist;
     }
 }

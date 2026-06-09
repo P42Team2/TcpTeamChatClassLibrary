@@ -8,17 +8,35 @@ namespace ChatClient
         public string CurrentUsername { get; private set; }
         public int CurrentUserId { get; private set; }
 
+        // Флаг: true, если юзер нажал Logout. По умолчанию false.
+        public bool IsLoggingOut { get; set; } = false;
+
         public Main(string username, int userId)
         {
             InitializeComponent();
             CurrentUsername = username;
             CurrentUserId = userId;
+
+            Program.NetworkClient.OnChatsListReceived += NetworkClient_OnChatsListReceived;
         }
 
         private void Main_Load(object sender, EventArgs e)
         {
             lblLoggedInAs.Text = $"You are logged in as: {CurrentUsername}";
             SwitchScreen(new WelcomeControl());
+
+            Program.NetworkClient.LoadChatsList();
+        }
+
+        private void Main_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Program.NetworkClient.OnChatsListReceived -= NetworkClient_OnChatsListReceived;
+
+            // Если мы НЕ в процессе логаута — значит, юзер реально закрыл программу крестиком
+            if (!IsLoggingOut)
+            {
+                Application.Exit();
+            }
         }
 
         public void SwitchScreen(UserControl newScreen)

@@ -31,16 +31,21 @@
             lblLoggedInAs = new Label();
             label1 = new Label();
             groupBox1 = new GroupBox();
-            lblPortIP = new Label();
+            lblIpAndPort = new Label();
             groupBox2 = new GroupBox();
-            txtOldPswd = new TextBox();
-            label2 = new Label();
+            btnUpdatePassword = new Button();
             label3 = new Label();
-            txtNewPswd = new TextBox();
-            btnSaveNewPswd = new Button();
-            button1 = new Button();
+            txtNewPassword = new TextBox();
+            label2 = new Label();
+            txtOldPassword = new TextBox();
+            btnLogout = new Button();
+            groupBox3 = new GroupBox();
+            btnUpdateUsername = new Button();
+            label4 = new Label();
+            txtNewUsername = new TextBox();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
+            groupBox3.SuspendLayout();
             SuspendLayout();
             // 
             // lblLoggedInAs
@@ -64,7 +69,7 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(lblPortIP);
+            groupBox1.Controls.Add(lblIpAndPort);
             groupBox1.Controls.Add(lblLoggedInAs);
             groupBox1.Location = new Point(3, 38);
             groupBox1.Name = "groupBox1";
@@ -73,22 +78,22 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Info";
             // 
-            // lblPortIP
+            // lblIpAndPort
             // 
-            lblPortIP.AutoSize = true;
-            lblPortIP.Location = new Point(294, 19);
-            lblPortIP.Name = "lblPortIP";
-            lblPortIP.Size = new Size(68, 15);
-            lblPortIP.TabIndex = 2;
-            lblPortIP.Text = "IP and Port:";
+            lblIpAndPort.AutoSize = true;
+            lblIpAndPort.Location = new Point(294, 19);
+            lblIpAndPort.Name = "lblIpAndPort";
+            lblIpAndPort.Size = new Size(68, 15);
+            lblIpAndPort.TabIndex = 2;
+            lblIpAndPort.Text = "IP and Port:";
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(btnSaveNewPswd);
+            groupBox2.Controls.Add(btnUpdatePassword);
             groupBox2.Controls.Add(label3);
-            groupBox2.Controls.Add(txtNewPswd);
+            groupBox2.Controls.Add(txtNewPassword);
             groupBox2.Controls.Add(label2);
-            groupBox2.Controls.Add(txtOldPswd);
+            groupBox2.Controls.Add(txtOldPassword);
             groupBox2.Location = new Point(3, 88);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(592, 68);
@@ -96,21 +101,15 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "Change Password";
             // 
-            // txtOldPswd
+            // btnUpdatePassword
             // 
-            txtOldPswd.Location = new Point(6, 37);
-            txtOldPswd.Name = "txtOldPswd";
-            txtOldPswd.Size = new Size(188, 23);
-            txtOldPswd.TabIndex = 5;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(6, 19);
-            label2.Name = "label2";
-            label2.Size = new Size(82, 15);
-            label2.TabIndex = 6;
-            label2.Text = "Old password:";
+            btnUpdatePassword.Location = new Point(394, 19);
+            btnUpdatePassword.Name = "btnUpdatePassword";
+            btnUpdatePassword.Size = new Size(192, 41);
+            btnUpdatePassword.TabIndex = 9;
+            btnUpdatePassword.Text = "Update Password";
+            btnUpdatePassword.UseVisualStyleBackColor = true;
+            btnUpdatePassword.Click += btnUpdatePassword_Click;
             // 
             // label3
             // 
@@ -121,37 +120,84 @@
             label3.TabIndex = 8;
             label3.Text = "New password:";
             // 
-            // txtNewPswd
+            // txtNewPassword
             // 
-            txtNewPswd.Location = new Point(200, 37);
-            txtNewPswd.Name = "txtNewPswd";
-            txtNewPswd.Size = new Size(188, 23);
-            txtNewPswd.TabIndex = 7;
+            txtNewPassword.Location = new Point(200, 37);
+            txtNewPassword.Name = "txtNewPassword";
+            txtNewPassword.Size = new Size(188, 23);
+            txtNewPassword.TabIndex = 7;
             // 
-            // btnSaveNewPswd
+            // label2
             // 
-            btnSaveNewPswd.Location = new Point(394, 19);
-            btnSaveNewPswd.Name = "btnSaveNewPswd";
-            btnSaveNewPswd.Size = new Size(192, 41);
-            btnSaveNewPswd.TabIndex = 9;
-            btnSaveNewPswd.Text = "Save Password";
-            btnSaveNewPswd.UseVisualStyleBackColor = true;
+            label2.AutoSize = true;
+            label2.Location = new Point(6, 19);
+            label2.Name = "label2";
+            label2.Size = new Size(82, 15);
+            label2.TabIndex = 6;
+            label2.Text = "Old password:";
             // 
-            // button1
+            // txtOldPassword
             // 
-            button1.ForeColor = Color.Red;
-            button1.Location = new Point(3, 162);
-            button1.Name = "button1";
-            button1.Size = new Size(592, 26);
-            button1.TabIndex = 5;
-            button1.Text = "Log Out";
-            button1.UseVisualStyleBackColor = true;
+            txtOldPassword.Location = new Point(6, 37);
+            txtOldPassword.Name = "txtOldPassword";
+            txtOldPassword.Size = new Size(188, 23);
+            txtOldPassword.TabIndex = 5;
+            // 
+            // btnLogout
+            // 
+            btnLogout.ForeColor = Color.Red;
+            btnLogout.Location = new Point(3, 236);
+            btnLogout.Name = "btnLogout";
+            btnLogout.Size = new Size(592, 26);
+            btnLogout.TabIndex = 5;
+            btnLogout.Text = "Log Out";
+            btnLogout.UseVisualStyleBackColor = true;
+            btnLogout.Click += btnLogout_Click;
+            // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(btnUpdateUsername);
+            groupBox3.Controls.Add(label4);
+            groupBox3.Controls.Add(txtNewUsername);
+            groupBox3.Location = new Point(3, 162);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(592, 68);
+            groupBox3.TabIndex = 6;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Change Username";
+            // 
+            // btnUpdateUsername
+            // 
+            btnUpdateUsername.Location = new Point(394, 19);
+            btnUpdateUsername.Name = "btnUpdateUsername";
+            btnUpdateUsername.Size = new Size(192, 41);
+            btnUpdateUsername.TabIndex = 9;
+            btnUpdateUsername.Text = "Update Username";
+            btnUpdateUsername.UseVisualStyleBackColor = true;
+            btnUpdateUsername.Click += btnUpdateUsername_Click;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(6, 19);
+            label4.Name = "label4";
+            label4.Size = new Size(89, 15);
+            label4.TabIndex = 8;
+            label4.Text = "New username:";
+            // 
+            // txtNewUsername
+            // 
+            txtNewUsername.Location = new Point(6, 37);
+            txtNewUsername.Name = "txtNewUsername";
+            txtNewUsername.Size = new Size(382, 23);
+            txtNewUsername.TabIndex = 7;
             // 
             // SettingsControl
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(button1);
+            Controls.Add(groupBox3);
+            Controls.Add(btnLogout);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(label1);
@@ -161,6 +207,8 @@
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            groupBox3.ResumeLayout(false);
+            groupBox3.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -170,13 +218,17 @@
         private Label lblLoggedInAs;
         private Label label1;
         private GroupBox groupBox1;
-        private Label lblPortIP;
+        private Label lblIpAndPort;
         private GroupBox groupBox2;
         private Label label3;
-        private TextBox txtNewPswd;
+        private TextBox txtNewPassword;
         private Label label2;
-        private TextBox txtOldPswd;
-        private Button btnSaveNewPswd;
-        private Button button1;
+        private TextBox txtOldPassword;
+        private Button btnUpdatePassword;
+        private Button btnLogout;
+        private GroupBox groupBox3;
+        private Button btnUpdateUsername;
+        private Label label4;
+        private TextBox txtNewUsername;
     }
 }

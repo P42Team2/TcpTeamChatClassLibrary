@@ -89,6 +89,7 @@
             Controls.Add(txtUsername);
             Name = "Register";
             Size = new Size(163, 129);
+            ControlRemoved += Register_Disposed;
             ResumeLayout(false);
             PerformLayout();
         }

@@ -29,14 +29,13 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            txtInput = new TextBox();
             btnSend = new Button();
+            txtInput = new TextBox();
             panel2 = new Panel();
-            lblChatName = new Label();
-            lblChatInfo = new Label();
-            btnSearch = new Button();
-            txtSearch = new TextBox();
             label1 = new Label();
+            txtSearch = new TextBox();
+            lblChatInfo = new Label();
+            lblChatName = new Label();
             rtbChatHistory = new RichTextBox();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
@@ -53,13 +52,6 @@
             panel1.Size = new Size(598, 34);
             panel1.TabIndex = 0;
             // 
-            // txtInput
-            // 
-            txtInput.Location = new Point(3, 3);
-            txtInput.Name = "txtInput";
-            txtInput.Size = new Size(541, 23);
-            txtInput.TabIndex = 0;
-            // 
             // btnSend
             // 
             btnSend.Image = Properties.Resources.send__1_;
@@ -68,13 +60,20 @@
             btnSend.Size = new Size(43, 23);
             btnSend.TabIndex = 1;
             btnSend.UseVisualStyleBackColor = true;
+            btnSend.Click += btnSend_Click;
+            // 
+            // txtInput
+            // 
+            txtInput.Location = new Point(3, 3);
+            txtInput.Name = "txtInput";
+            txtInput.Size = new Size(541, 23);
+            txtInput.TabIndex = 0;
             // 
             // panel2
             // 
             panel2.BorderStyle = BorderStyle.FixedSingle;
             panel2.Controls.Add(label1);
             panel2.Controls.Add(txtSearch);
-            panel2.Controls.Add(btnSearch);
             panel2.Controls.Add(lblChatInfo);
             panel2.Controls.Add(lblChatName);
             panel2.Dock = DockStyle.Top;
@@ -83,15 +82,22 @@
             panel2.Size = new Size(598, 64);
             panel2.TabIndex = 1;
             // 
-            // lblChatName
+            // label1
             // 
-            lblChatName.AutoSize = true;
-            lblChatName.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblChatName.Location = new Point(15, 13);
-            lblChatName.Name = "lblChatName";
-            lblChatName.Size = new Size(88, 21);
-            lblChatName.TabIndex = 2;
-            lblChatName.Text = "Chat Name";
+            label1.AutoSize = true;
+            label1.Location = new Point(433, 13);
+            label1.Name = "label1";
+            label1.Size = new Size(45, 15);
+            label1.TabIndex = 6;
+            label1.Text = "Search:";
+            // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(433, 26);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(142, 23);
+            txtSearch.TabIndex = 5;
+            txtSearch.TextChanged += txtSearch_TextChanged;
             // 
             // lblChatInfo
             // 
@@ -102,31 +108,15 @@
             lblChatInfo.TabIndex = 3;
             lblChatInfo.Text = "Was Online:";
             // 
-            // btnSearch
+            // lblChatName
             // 
-            btnSearch.BackgroundImageLayout = ImageLayout.Zoom;
-            btnSearch.Image = Properties.Resources.magnifying_glass;
-            btnSearch.Location = new Point(551, 20);
-            btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(31, 29);
-            btnSearch.TabIndex = 4;
-            btnSearch.UseVisualStyleBackColor = true;
-            // 
-            // txtSearch
-            // 
-            txtSearch.Location = new Point(433, 26);
-            txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(112, 23);
-            txtSearch.TabIndex = 5;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(433, 13);
-            label1.Name = "label1";
-            label1.Size = new Size(45, 15);
-            label1.TabIndex = 6;
-            label1.Text = "Search:";
+            lblChatName.AutoSize = true;
+            lblChatName.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblChatName.Location = new Point(15, 13);
+            lblChatName.Name = "lblChatName";
+            lblChatName.Size = new Size(88, 21);
+            lblChatName.TabIndex = 2;
+            lblChatName.Text = "Chat Name";
             // 
             // rtbChatHistory
             // 
@@ -146,6 +136,7 @@
             Controls.Add(panel1);
             Name = "ChatLogControl";
             Size = new Size(598, 450);
+            ControlRemoved += Control_Disposed;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
@@ -160,7 +151,6 @@
         private TextBox txtInput;
         private Panel panel2;
         private Label lblChatName;
-        private Button btnSearch;
         private Label lblChatInfo;
         private Label label1;
         private TextBox txtSearch;

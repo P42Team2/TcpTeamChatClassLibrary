@@ -32,8 +32,8 @@
             btnRegister = new Button();
             pnlLogIn = new Panel();
             groupBox1 = new GroupBox();
-            txtIP = new TextBox();
             txtPort = new TextBox();
+            txtIP = new TextBox();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -75,14 +75,6 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Address";
             // 
-            // txtIP
-            // 
-            txtIP.Location = new Point(6, 22);
-            txtIP.Name = "txtIP";
-            txtIP.Size = new Size(100, 23);
-            txtIP.TabIndex = 4;
-            txtIP.Text = "127.0.0.1";
-            // 
             // txtPort
             // 
             txtPort.Location = new Point(6, 51);
@@ -90,6 +82,14 @@
             txtPort.Size = new Size(100, 23);
             txtPort.TabIndex = 5;
             txtPort.Text = "6767";
+            // 
+            // txtIP
+            // 
+            txtIP.Location = new Point(6, 22);
+            txtIP.Name = "txtIP";
+            txtIP.Size = new Size(100, 23);
+            txtIP.TabIndex = 4;
+            txtIP.Text = "127.0.0.1";
             // 
             // LoginForm
             // 
@@ -102,6 +102,7 @@
             Controls.Add(btnLogIn);
             Name = "LoginForm";
             Text = "LoginForm";
+            FormClosed += LoginForm_FormClosed;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);

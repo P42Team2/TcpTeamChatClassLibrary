@@ -141,6 +141,7 @@
             Controls.Add(panel1);
             Name = "ContactsManagementControl";
             Size = new Size(598, 450);
+            ControlRemoved += ContactsManagementControl_Disposed;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ResumeLayout(false);

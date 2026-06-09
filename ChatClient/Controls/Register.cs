@@ -58,5 +58,10 @@ namespace ChatClient.Controls
                 }
             });
         }
+
+        private void Register_Disposed(object sender, ControlEventArgs e)
+        {
+            Program.NetworkClient.OnRegisterResult -= NetworkClient_OnRegisterResult;
+        }
     }
 }
