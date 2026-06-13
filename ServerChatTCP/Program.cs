@@ -13,6 +13,7 @@ namespace Server
 {
     internal class Program
     {
+        // логер, записує у файл та у консоль помилки
         private static Logger _logWarring = new LoggerConfiguration().MinimumLevel.Warning()
             .WriteTo.Console()
             .WriteTo.File(
