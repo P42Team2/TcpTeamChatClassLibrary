@@ -21,9 +21,8 @@ namespace Server
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
-        private static ChatDB_Context _context=new ChatDB_Context();
+        private static object _lock = new object();
 
-        
         internal static ConcurrentDictionary<int, TcpClient> onlineUsers = new();
 
         internal static int localPort = 10000;
@@ -47,11 +46,14 @@ namespace Server
 
             void HandleClient(TcpClient client)
             {
+                int currentUserId = -1;// якщо від'ємне значення змінної то вона вважається не ініціалізованою
+                ChatDB_Context context = new ChatDB_Context();
                 try
                 {
                     using NetworkStream ns = client.GetStream();
                     using StreamReader reader = new StreamReader(ns);
                     using StreamWriter writer = new StreamWriter(ns);
+
 
                     writer.AutoFlush = true;
 
@@ -85,9 +87,8 @@ namespace Server
                                         break;
                                     }
 
-                                    // тут нужна проверка как раз данных через бд, с ентити сами допилите
                                     // если неправильно или не найдено - то ResponseType.LoginError, если найдено - ResponseType.LoginSuccess
-                                    User? acountUser = _context.Users.FirstOrDefault(u => u.Login == dataLogin.Username);
+                                    User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataLogin.Username);
                                     if (acountUser==null)
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Login. This accuont does not existing"));
@@ -104,7 +105,13 @@ namespace Server
                                     }
 
                                     // после этого если вход успешный, должны вытянуть айди пользователя и записать в переменную, которая потом добавит его в дикшинари 
-                                    onlineUsers[acountUser.Id] = client;
+                                    currentUserId = acountUser.Id;
+                                    lock(_lock)
+                                    {
+                                        context.Users.First(u=>u.Id==currentUserId).Status = UserStatus.Online;
+                                        context.SaveChanges();
+                                    }
+                                    onlineUsers[currentUserId] = client;
 
                                     writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.LoginSuccess, JsonSerializer.Serialize(acountUser))));
 
@@ -259,6 +266,15 @@ namespace Server
                 finally
                 {
                     client.Close();
+                    if (currentUserId > 0)
+                    {
+                        onlineUsers.TryRemove(currentUserId, out _);
+                        lock (_lock)
+                        {
+                            context.Users.First(u => u.Id == currentUserId).Status = UserStatus.Offline;
+                            context.SaveChanges();
+                        }
+                    }
                     Console.WriteLine("Client connection closed");
                 }
             }
