@@ -25,13 +25,13 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
 
     public class NetworkRequest
     {
-        public NetworkRequest(RequestType type, string data)
+        public NetworkRequest(RequestType type, string request)
         {
             Type = type;
-            Data = data;
+            Request = request;
         }
 
         public RequestType Type { get; set; }
-        public string Data { get; set; }
+        public string Request { get; set; }
     }
 }

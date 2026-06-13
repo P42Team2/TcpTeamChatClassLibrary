@@ -77,7 +77,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Login request");
 
-                                    LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
+                                    LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Request);
 
                                     if (dataLogin == null)
                                     {
@@ -122,7 +122,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Register request");
 
-                                    LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
+                                    LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Request);
 
                                     if (dataRegister == null)
                                     {
@@ -141,7 +141,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Send message request");
 
-                                    SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Data);
+                                    SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Request);
 
                                     if (msg == null)
                                         break;
