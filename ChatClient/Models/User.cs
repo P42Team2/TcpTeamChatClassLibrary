@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+//я не знаю хто це сюди додав, сподіваюсь вам це треба
 using static System.Windows.Forms.Design.AxImporter;
 
 namespace ChatClient.Models
