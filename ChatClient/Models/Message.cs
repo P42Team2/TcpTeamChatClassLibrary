@@ -14,11 +14,15 @@ namespace ChatClient.Models
 
 
         // тут все понятно
-        public User User { get; set; }
-        public int UserId { get; set; }
+        public User Sender { get; set; } = default!;
+        public int SenderId { get; set; }
         public DateTime TimeWhenMessageSended { get; set; }
 
+        public int ReceiverId { get; set; }
+        public User Receiver { get; set; } = default!;
+        /*
         public Chat Chat { get; set; }
         public int ChatId { get; set; }
+        */
     }
 }
