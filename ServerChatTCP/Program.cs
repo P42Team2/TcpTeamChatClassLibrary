@@ -106,7 +106,7 @@ namespace Server
                                     // после этого если вход успешный, должны вытянуть айди пользователя и записать в переменную, которая потом добавит его в дикшинари 
                                     onlineUsers[acountUser.Id] = client;
 
-                                    //writer.WriteLine(JsonSerializer.Serialize());
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.LoginSuccess, JsonSerializer.Serialize(acountUser))));
 
                                     break;
                                 }
