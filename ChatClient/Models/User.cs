@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Windows.Forms.Design.AxImporter;
@@ -38,6 +39,8 @@ namespace ChatClient.Models
         public IList<Message> Messages { get; set; } = new List<Message>(); 
 
         public readonly DateTime CreatedAt;
+
+        public IPEndPoint GetEndPoint() => new IPEndPoint(IPAddress.Parse(IpAddressStr), Port);
 
         // Зайве (поки не видаляти)
         /*
