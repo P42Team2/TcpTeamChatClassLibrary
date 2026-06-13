@@ -53,7 +53,7 @@ void HandleClient(TcpClient client)
                     {
                         Console.WriteLine("Login request");
 
-                        LoginAndRegisterRequest dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
+                        LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
 
                         if (dataLogin == null)
                         {
@@ -78,7 +78,7 @@ void HandleClient(TcpClient client)
                     {
                         Console.WriteLine("Register request");
 
-                        LoginAndRegisterRequest dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
+                        LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Data);
 
                         if (dataRegister == null)
                         {
@@ -97,7 +97,7 @@ void HandleClient(TcpClient client)
                     {
                         Console.WriteLine("Send message request");
 
-                        SendMessageRequest msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Data);
+                        SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Data);
 
                         if (msg == null)
                             break;
