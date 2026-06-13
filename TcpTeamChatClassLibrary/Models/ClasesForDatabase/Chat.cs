@@ -1,7 +1,9 @@
 ﻿// потім, або ніколи
 // про цей клас можна забути
 // але я на всякий випадок його залишу
-/*
+// поки бажано з полями цього класу нічого не коїти
+// більшу їх частину буде змінено
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,4 +25,3 @@ namespace ChatClient.Models
         public ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }
-*/

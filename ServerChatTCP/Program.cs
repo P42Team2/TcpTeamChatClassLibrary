@@ -21,6 +21,9 @@ namespace Server
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
+        private static ChatDB_Context _context=new ChatDB_Context();
+
+        
         internal static ConcurrentDictionary<int, TcpClient> onlineUsers = new();
 
         internal static int localPort = 10000;
@@ -84,9 +87,24 @@ namespace Server
 
                                     // тут нужна проверка как раз данных через бд, с ентити сами допилите
                                     // если неправильно или не найдено - то ResponseType.LoginError, если найдено - ResponseType.LoginSuccess
+                                    User? acountUser = _context.Users.FirstOrDefault(u => u.Login == dataLogin.Username);
+                                    if (acountUser==null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Login. This accuont does not existing"));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+                                    else if(acountUser.Password != dataLogin.Password)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Password."));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
 
                                     // после этого если вход успешный, должны вытянуть айди пользователя и записать в переменную, которая потом добавит его в дикшинари 
-                                    // onlineUsers[userId] = client;
+                                    onlineUsers[acountUser.Id] = client;
 
                                     //writer.WriteLine(JsonSerializer.Serialize());
 

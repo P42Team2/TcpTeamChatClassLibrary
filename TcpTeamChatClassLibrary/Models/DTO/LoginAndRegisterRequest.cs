@@ -8,7 +8,7 @@ namespace TcpTeamChatClassLibrary.Models.DTO
 {
     public class LoginAndRegisterRequest
     {
-        public string Username { get; set; } = default!;
+        public string Username { get; set; } = default!; // login, як я зрозумів
         public string Password { get; set; } = default!;
     }
 }

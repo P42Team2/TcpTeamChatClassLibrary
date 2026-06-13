@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 
-namespace ChatClient.Models.ClasesForDatabase
+namespace ChatClient.Models
 {
     public class ChatDB_Context : DbContext
     {
@@ -16,7 +16,11 @@ namespace ChatClient.Models.ClasesForDatabase
         public DbSet<Message> Messages { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connStr = "workstation id=ChatClientDB.mssql.somee.com;packet size=4096;user id=ChatClient;pwd=Qwerty_1234!;data source=ChatClientDB.mssql.somee.com;persist security info=False;initial catalog=ChatClientDB;TrustServerCertificate=True";
+            // * пишу на випадок якщо забуду замінити сам
+            // для тесту я поверну свій connStr
+            // але коли доробимо потрібно буде замінити на:
+            // workstation id=ChatClientDB.mssql.somee.com;packet size=4096;user id=ChatClient;pwd=Qwerty_1234!;data source=ChatClientDB.mssql.somee.com;persist security info=False;initial catalog=ChatClientDB;TrustServerCertificate=True
+            string connStr = "Server=(localdb)\\MSSQLLocalDB;Database=ChatDB;Trusted_Connection=True;TrustServerCertificate=true;";
             optionsBuilder.UseSqlServer(connStr);
         }
 

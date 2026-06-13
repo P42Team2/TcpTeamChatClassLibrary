@@ -50,12 +50,12 @@ namespace ChatClient.Models
         public ICollection<Contact> OwnContacts { get; set; } = new List<Contact>();
         public ICollection<Contact> AddedToContacts { get; set; } = new List<Contact>();
 
-        public IList<Message> SentMessages { get; set; }
-        public IList<Message> ReceivedMessages { get; set; }
+        public IList<Message> SentMessages { get; set; } = new List<Message>();
+        public IList<Message> ReceivedMessages { get; set; } = new List<Message>();
 
         public DateTime CreatedAt { get; private set; }
 
-        public IPEndPoint GetEndPoint() => new IPEndPoint(IPAddress.Parse(IpAddressStr), Port);
+        public IPEndPoint GetEndPoint() => new IPEndPoint(_address, Port);
 
         // Зайве (поки не видаляти)
         /*
