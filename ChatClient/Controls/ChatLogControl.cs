@@ -88,7 +88,7 @@ namespace ChatClient.Controls
             {
                 var filtered = _currentChatMessages
                     .Where(m => m.Text.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                m.User.Nickname.Contains(query, StringComparison.OrdinalIgnoreCase))
+                                m.Sender.Nickname.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 DisplayMessages(filtered);
@@ -108,7 +108,7 @@ namespace ChatClient.Controls
         private void AppendMessageToRichTextBox(Message msg)
         {
             rtbChatHistory.SelectionFont = new Font(rtbChatHistory.Font, FontStyle.Bold);
-            rtbChatHistory.AppendText($"{msg.User.Nickname}: ");
+            rtbChatHistory.AppendText($"{msg.Sender.Nickname}: ");
 
             rtbChatHistory.SelectionFont = new Font(rtbChatHistory.Font, FontStyle.Regular);
             rtbChatHistory.AppendText($"{msg.Text}\r\n");
