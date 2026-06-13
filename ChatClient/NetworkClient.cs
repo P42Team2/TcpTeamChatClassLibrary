@@ -17,7 +17,9 @@ namespace ChatClient
         public event Action<List<User>> OnBlacklistReceived;   // передает список заблокированных
         public event Action<Message> OnMessageReceived;        // срабатывает при ПРИЁМЕ нового сообщения (в реальном времени)
         public event Action<List<Message>> OnHistoryReceived;  // передает пачку сообщений из истории для отрисовки
-        public event Action<List<Chat>> OnChatsListReceived;   // передает список активных диалогов пользователя
+
+        // я замінив Chat на Contact бо класу чат тепер немає
+        public event Action<List<Contact>> OnChatsListReceived;   // передает список активных диалогов пользователя
 
         // autorisation
         public void Connect(string ip, int port) { }

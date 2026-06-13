@@ -1,4 +1,8 @@
-﻿using System;
+﻿// потім, або ніколи
+// про цей клас можна забути
+// але я на всякий випадок його залишу
+/*
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,3 +23,4 @@ namespace ChatClient.Models
         public ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }
+*/
