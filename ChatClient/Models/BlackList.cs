@@ -1,7 +1,7 @@
 ﻿// потім, або ніколи
 // про цей клас можна забути
 // але я на всякий випадок його залишу
-/*
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,4 +26,3 @@ namespace ChatClient.Models
         public User BlockedUser { get; set; }
     }
 }
-*/
