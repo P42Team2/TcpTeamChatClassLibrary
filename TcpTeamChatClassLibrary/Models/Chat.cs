@@ -1,10 +1,14 @@
-﻿using System;
+﻿// потім, або ніколи
+// про цей клас можна забути
+// але я на всякий випадок його залишу
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TcpTeamChatClassLibrary.Models
+namespace ChatClient.Models
 {
     // new class
     public class Chat
