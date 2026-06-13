@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ChatClient.Models
 {
-    public class ChatDB_Context
+    public enum UserStatus
     {
+        Online,
+        Offline
     }
 }

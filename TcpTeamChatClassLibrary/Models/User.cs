@@ -4,8 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-//я не знаю хто це сюди додав, сподіваюсь вам це треба
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace ChatClient.Models
 {
@@ -49,7 +47,7 @@ namespace ChatClient.Models
         public DateTime LastSeen { get; set; }
 
         // New
-        public ICollection<Contact> Contacts { get; set; } = new List<Contact>();
+        public ICollection<Contact> OwnContacts { get; set; } = new List<Contact>();
         public ICollection<Contact> AddedToContacts { get; set; } = new List<Contact>();
 
         public IList<Message> SentMessages { get; set; }
