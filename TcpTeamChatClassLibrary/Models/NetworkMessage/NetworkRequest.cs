@@ -28,10 +28,10 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
         public NetworkRequest(RequestType type, string request)
         {
             Type = type;
-            Request = request;
+            Payload = request;
         }
 
         public RequestType Type { get; set; }
-        public string Request { get; set; }
+        public string Payload { get; set; }
     }
 }

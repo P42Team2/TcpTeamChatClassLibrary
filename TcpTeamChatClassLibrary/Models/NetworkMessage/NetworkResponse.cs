@@ -18,12 +18,12 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
     public class NetworkResponse
     {
         public ResponseType Type { get; set; }
-        public string Response { get; set; }
+        public string Payload { get; set; }
 
         public NetworkResponse(ResponseType type, string response)
         {
             Type = type;
-            Response = response;
+            Payload = response;
         }
     }
 }

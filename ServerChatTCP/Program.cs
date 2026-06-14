@@ -54,7 +54,6 @@ namespace Server
                     using StreamReader reader = new StreamReader(ns);
                     using StreamWriter writer = new StreamWriter(ns);
 
-
                     writer.AutoFlush = true;
 
                     while (client.Connected)
@@ -77,7 +76,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Login request");
 
-                                    LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Request);
+                                    LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Payload);
 
                                     if (dataLogin == null)
                                     {
@@ -122,7 +121,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Register request");
 
-                                    LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Request);
+                                    LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Payload);
 
                                     if (dataRegister == null)
                                     {
@@ -131,7 +130,25 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
+                                    
+                                    User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataRegister.Username);
+                                    if (acountUser != null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.RegisterError, JsonSerializer.Serialize("An account with this login has already been created."));
 
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+                                    acountUser = new User { Login=dataRegister.Username, Password=dataRegister.Password, Status=UserStatus.Online};
+                                    acountUser.SetIpAndPort(client.Client);
+
+                                    lock(_lock)
+                                    {
+                                        context.Users.Add(acountUser);
+                                        context.SaveChanges();
+                                    }
+                                    onlineUsers[acountUser.Id] = client;
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.RegisterSuccess, JsonSerializer.Serialize(acountUser))));
                                     // тоже самое: если в бд нашли dataRegister.Username - то ошибка, если не нашли, то создаёте нового юзера
 
                                     break;
@@ -141,7 +158,7 @@ namespace Server
                                 {
                                     Console.WriteLine("Send message request");
 
-                                    SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Request);
+                                    SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Payload);
 
                                     if (msg == null)
                                         break;

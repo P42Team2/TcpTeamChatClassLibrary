@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace ChatClient.Models
         // Мабуть так буде легше
         public User()
         {
-            CreatedAt = DateTime.Now;
+            CreatedAt = DateTime.Now; LastSeen = DateTime.Now;
         }
 
         public int Id { get; set; }
@@ -36,7 +37,7 @@ namespace ChatClient.Models
                 }
             }
         }
-        public int Port { get; set; }
+        private int _port { get; set; }
 
         public UserStatus Status { get; set; }
 
@@ -55,7 +56,15 @@ namespace ChatClient.Models
 
         public DateTime CreatedAt { get; private set; }
 
-        public IPEndPoint GetEndPoint() => new IPEndPoint(_address, Port);
+        public IPEndPoint GetEndPoint() => new IPEndPoint(_address, _port);
+
+        public void SetIpAndPort(Socket socket)
+        {
+            var endPoint = (IPEndPoint)socket.RemoteEndPoint!;
+
+            _address = endPoint.Address;
+            _port = endPoint.Port;
+        }
 
         // Зайве (поки не видаляти)
         /*

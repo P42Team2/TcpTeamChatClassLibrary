@@ -26,6 +26,10 @@ namespace ChatClient.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                .HasIndex(x => x.Login)
+                .IsUnique();
+
             modelBuilder.Entity<Contact>()
                 .HasOne(c=>c.OwnerUser)
                 .WithMany(u=>u.OwnContacts)
