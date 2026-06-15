@@ -19,5 +19,7 @@ namespace ChatClient.Models
 
         public string? DisplayName { get; set; }
         public DateTime AddedAt { get; set; }
+
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }

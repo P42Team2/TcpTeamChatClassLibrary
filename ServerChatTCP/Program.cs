@@ -177,10 +177,10 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
-
+                                    Message message = new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now };
                                     lock (_lock)
                                     {
-                                        context.Messages.Add(new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now });
+                                        context.Messages.Add(message);
                                         context.SaveChanges();
                                     }
 
@@ -191,8 +191,9 @@ namespace Server
                                             NetworkStream nsReceiver = receiverClient.GetStream();
                                             StreamWriter writerReceiver = new StreamWriter(nsReceiver);
                                             writerReceiver.AutoFlush = true;
-
-                                            var response = new NetworkResponse(ResponseType.MessageReceived, JsonSerializer.Serialize(msg));
+                                            //я тут замінив SendMessageRequest на просто Message
+                                            //це було зроблено оскільки SendMessageRequest має неповну інформацію про повідомлення
+                                            var response = new NetworkResponse(ResponseType.MessageReceived, JsonSerializer.Serialize(message));
 
                                             string json = JsonSerializer.Serialize(response);
 
@@ -255,12 +256,12 @@ namespace Server
                                         break;
                                     }
 
-                                    Contact? contact = context.Contacts.FirstOrDefault(c => 
+                                    Contact? contact = context.Contacts.FirstOrDefault(c =>
                                     (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id)
                                     ||
                                     (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
 
-                                    if (contact!=null)
+                                    if (contact != null)
                                     {
                                         writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, JsonSerializer.Serialize(contact))));
                                         break;
@@ -287,7 +288,7 @@ namespace Server
                                     {
                                         break;
                                     }
-                                   
+
                                     var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload);
                                     User? userContact = null;
 
@@ -360,15 +361,28 @@ namespace Server
                                 Console.WriteLine("Load blacklist request");
 
 
+
                                 break;
 
                             case RequestType.LoadChatHistory:
-
+                            { 
                                 Console.WriteLine("Load history request");
 
+                                int contactId = JsonSerializer.Deserialize<int>(clientRequest.Payload);
+                                if (context.Contacts.Any(c => c.Id == contactId))
+                                {
+                                    Message[] chatHistory = context.Contacts.First(c => c.Id == contactId).Messages.ToArray();
+                                    writer.WriteLine(JsonSerializer.Serialize(chatHistory)); break;
+                                }
+                                else
+                                {
+                                    var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("An contact with this id does not existing."));
 
-                                break;
+                                    writer.WriteLine(JsonSerializer.Serialize(errorResponse));
 
+                                    break;
+                                }
+                            }
                             case RequestType.CreateGroupChat:
 
                                 Console.WriteLine("Create group request");

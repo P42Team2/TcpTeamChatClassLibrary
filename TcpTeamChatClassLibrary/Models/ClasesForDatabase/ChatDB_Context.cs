@@ -50,6 +50,12 @@ namespace ChatClient.Models
                 .HasOne(c => c.ContactUser)
                 .WithMany(u => u.AddedToContacts)
                 .HasForeignKey(c => c.ContactUserId).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Contact)
+                .WithMany(u => u.Messages)
+                .HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

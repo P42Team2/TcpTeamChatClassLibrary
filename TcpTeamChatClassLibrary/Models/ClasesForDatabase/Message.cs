@@ -20,6 +20,9 @@ namespace ChatClient.Models
 
         public int ReceiverId { get; set; }
         public User Receiver { get; set; } = default!;
+
+        public Contact Contact { get; set; } = default!;
+        public int ContactId { get; set; }
         /*
         public Chat Chat { get; set; }
         public int ChatId { get; set; }
