@@ -95,14 +95,14 @@ namespace Server
 
                                     // если неправильно или не найдено - то ResponseType.LoginError, если найдено - ResponseType.LoginSuccess
                                     User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataLogin.Username);
-                                    if (acountUser==null)
+                                    if (acountUser == null)
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Login. This accuont does not existing"));
 
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
-                                    else if(acountUser.Password != dataLogin.Password)
+                                    else if (acountUser.Password != dataLogin.Password)
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Password."));
 
@@ -112,9 +112,9 @@ namespace Server
 
                                     // после этого если вход успешный, должны вытянуть айди пользователя и записать в переменную, которая потом добавит его в дикшинари 
                                     currentUserId = acountUser.Id;
-                                    lock(_lock)
+                                    lock (_lock)
                                     {
-                                        context.Users.First(u=>u.Id==currentUserId).Status = UserStatus.Online;
+                                        context.Users.First(u => u.Id == currentUserId).Status = UserStatus.Online;
                                         context.SaveChanges();
                                     }
                                     onlineUsers[currentUserId] = client;
@@ -137,7 +137,7 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
-                                    
+
                                     User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataRegister.Username);
                                     if (acountUser != null)
                                     {
@@ -146,10 +146,10 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
-                                    acountUser = new User { Login=dataRegister.Username, Password=dataRegister.Password, Status=UserStatus.Online};
+                                    acountUser = new User { Login = dataRegister.Username, Password = dataRegister.Password, Status = UserStatus.Online };
                                     acountUser.SetIpAndPort(client.Client);
 
-                                    lock(_lock)
+                                    lock (_lock)
                                     {
                                         context.Users.Add(acountUser);
                                         context.SaveChanges();
@@ -170,7 +170,7 @@ namespace Server
                                     if (msg == null)
                                         break;
 
-                                    if (!context.Users.Any(u=>u.Id==msg.ReceiverId))
+                                    if (!context.Users.Any(u => u.Id == msg.ReceiverId))
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.MessageError, JsonSerializer.Serialize("Accuont of receiver does not existing"));
 
@@ -178,9 +178,9 @@ namespace Server
                                         break;
                                     }
 
-                                    lock(_lock)
+                                    lock (_lock)
                                     {
-                                        context.Messages.Add(new Message { Text=msg.Text, ReceiverId=msg.ReceiverId, SenderId=msg.SenderId, TimeWhenMessageSended=DateTime.Now});
+                                        context.Messages.Add(new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now });
                                         context.SaveChanges();
                                     }
 
@@ -217,7 +217,7 @@ namespace Server
 
                             case RequestType.AddContact:
                                 {
-                                    if (currentUserId<0)
+                                    if (currentUserId < 0)
                                     {
                                         break;
                                     }
@@ -255,7 +255,18 @@ namespace Server
                                         break;
                                     }
 
-                                    Contact contact = new Contact { OwnerUserId=currentUserId, ContactUserId=userContact.Id, DisplayName=null, AddedAt=DateTime.Now};
+                                    Contact? contact = context.Contacts.FirstOrDefault(c => 
+                                    (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id)
+                                    ||
+                                    (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
+
+                                    if (contact!=null)
+                                    {
+                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, JsonSerializer.Serialize(contact))));
+                                        break;
+                                    }
+
+                                    contact = new Contact { OwnerUserId = currentUserId, ContactUserId = userContact.Id, DisplayName = null, AddedAt = DateTime.Now };
 
                                     lock (_lock)
                                     {
@@ -269,19 +280,74 @@ namespace Server
                                     // чем дальше в лес - if else if else
                                 }
                             case RequestType.DeleteContact:
+                                {
+                                    Console.WriteLine("Delete contact request");
 
-                                Console.WriteLine("Delete contact request");
+                                    if (currentUserId < 0)
+                                    {
+                                        break;
+                                    }
+                                   
+                                    var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload);
+                                    User? userContact = null;
 
+                                    if (request?.Id != null)
+                                    {
+                                        userContact = context.Users
+                                            .FirstOrDefault(u => u.Id == request.Id);
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(request?.Login))
+                                    {
+                                        userContact = context.Users
+                                            .FirstOrDefault(u => u.Login == request.Login);
+                                    }
+                                    else
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, JsonSerializer.Serialize("uncorrect payload"));
 
-                                break;
+                                        _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. ResponseType.UnexpectedError. \n" +
+                                            $"client request: {clientRequest.Payload}" +
+                                            $"\n request: id {request?.Id} | login {request?.Login}\n");
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+
+                                    if (userContact == null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("An account with this login/id does not existing."));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+
+                                    Contact? contact = context.Contacts.FirstOrDefault(c =>
+                                    (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id)
+                                    ||
+                                    (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
+
+                                    if (contact != null)
+                                    {
+                                        context.Contacts.Remove(contact);
+                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, "Contact was deleted")));
+                                        break;
+                                    }
+
+                                    // якщо контакту не існує то його можна вважати видаленим
+
+                                    break;
+                                    // чем дальше в лес - if else if else
+                                    // я не думав шо тут так багато проверок буде
+                                }
+
 
                             case RequestType.AddToBlacklist:
+                                {
+                                    Console.WriteLine("Add to blacklist request");
 
-                                Console.WriteLine("Add to blacklist request");
 
-
-                                break;
-
+                                    break;
+                                }
                             case RequestType.RemoveFromBlacklist:
 
                                 Console.WriteLine("Remove from blacklist request");
