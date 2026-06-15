@@ -17,7 +17,14 @@ namespace Server
         private static Logger _logWarring = new LoggerConfiguration().MinimumLevel.Warning()
             .WriteTo.Console()
             .WriteTo.File(
-                "logs/app-.txt",
+                "logs/warlog/app-.txt",
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        private static Logger _logInfo = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(
+                "logs/infolog/app-.txt",
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
@@ -39,7 +46,7 @@ namespace Server
             {
                 TcpClient client = listener.AcceptTcpClient();
 
-                Console.WriteLine($"[+] Client connected: {client.Client.RemoteEndPoint}");
+                _logInfo.Information($"[+] Client connected: {client.Client.RemoteEndPoint}");
 
                 _ = Task.Run(() => HandleClient(client));
             }
@@ -63,7 +70,7 @@ namespace Server
                         if (jsonRequest == null)
                             break;
 
-                        Console.WriteLine($"Received: {jsonRequest}");
+                        _logInfo.Information($"Received: {jsonRequest}");
 
                         NetworkRequest? clientRequest = JsonSerializer.Deserialize<NetworkRequest>(jsonRequest);
 
@@ -163,9 +170,19 @@ namespace Server
                                     if (msg == null)
                                         break;
 
-                                    //
-                                    // сохранить сообщение в бд
-                                    //
+                                    if (!context.Users.Any(u=>u.Id==msg.ReceiverId))
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, JsonSerializer.Serialize("Accuont of receiver does not existing"));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+
+                                    lock(_lock)
+                                    {
+                                        context.Messages.Add(new Message { Text=msg.Text, ReceiverId=msg.ReceiverId, SenderId=msg.SenderId, TimeWhenMessageSended=DateTime.Now});
+                                        context.SaveChanges();
+                                    }
 
                                     if (onlineUsers.TryGetValue(msg.ReceiverId, out TcpClient? receiverClient))
                                     {
@@ -199,12 +216,58 @@ namespace Server
                                 }
 
                             case RequestType.AddContact:
+                                {
+                                    if (currentUserId<0)
+                                    {
+                                        break;
+                                    }
+                                    Console.WriteLine("Add contact request");
+                                    var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload);
+                                    User? userContact = null;
 
-                                Console.WriteLine("Add contact request");
+                                    if (request?.Id != null)
+                                    {
+                                        userContact = context.Users
+                                            .FirstOrDefault(u => u.Id == request.Id);
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(request?.Login))
+                                    {
+                                        userContact = context.Users
+                                            .FirstOrDefault(u => u.Login == request.Login);
+                                    }
+                                    else
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, JsonSerializer.Serialize("uncorrect payload"));
 
+                                        _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. ResponseType.UnexpectedError. \n" +
+                                            $"client request: {clientRequest.Payload}" +
+                                            $"\n request: id {request?.Id} | login {request?.Login}\n");
 
-                                break;
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
 
+                                    if (userContact == null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("An account with this login/id does not existing."));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+
+                                    Contact contact = new Contact { OwnerUserId=currentUserId, ContactUserId=userContact.Id, DisplayName=null, AddedAt=DateTime.Now};
+
+                                    lock (_lock)
+                                    {
+                                        context.Contacts.Add(contact);
+                                        context.SaveChanges();
+                                    }
+
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, JsonSerializer.Serialize(contact))));
+
+                                    break;
+                                    // чем дальше в лес - if else if else
+                                }
                             case RequestType.DeleteContact:
 
                                 Console.WriteLine("Delete contact request");

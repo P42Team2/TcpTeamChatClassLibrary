@@ -12,7 +12,11 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
         LoginError,
         RegisterSuccess,
         RegisterError,
-        MessageReceived
+        MessageReceived,
+        MessageError,
+        UnexpectedError,
+        UserDoesNotExist,
+        SuccessContactRequest
     }
 
     public class NetworkResponse
