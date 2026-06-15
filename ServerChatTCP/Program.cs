@@ -177,13 +177,24 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse));
                                         break;
                                     }
-                                    Message message = new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now };
+                                    Contact? contact = context.Contacts.FirstOrDefault(c =>
+                                    (c.OwnerUserId == msg.ReceiverId && c.ContactUserId == msg.SenderId)
+                                    ||
+                                    (c.OwnerUserId == msg.SenderId && c.ContactUserId == msg.ReceiverId));
+                                    if (contact == null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, JsonSerializer.Serialize("Contact does not existing"));
+
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse));
+                                        break;
+                                    }
+                                    Message message = new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now, ContactId = contact!.Id };
                                     lock (_lock)
                                     {
                                         context.Messages.Add(message);
                                         context.SaveChanges();
                                     }
-
+                                    
                                     if (onlineUsers.TryGetValue(msg.ReceiverId, out TcpClient? receiverClient))
                                     {
                                         try
