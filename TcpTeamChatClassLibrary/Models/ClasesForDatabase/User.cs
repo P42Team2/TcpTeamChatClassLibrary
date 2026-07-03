@@ -21,24 +21,6 @@ namespace ChatClient.Models
         public string Login { get; set; } = default!;
         public string Password { get; set; } = default!;
 
-        private IPAddress _address = IPAddress.Loopback;
-
-        public string IpAddressStr
-        {
-            get
-            {
-                return _address.ToString();
-            }
-            set
-            {
-                if (IPAddress.TryParse(value, out IPAddress? address))
-                {
-                    _address = address;
-                }
-            }
-        }
-        private int _port { get; set; }
-
         public UserStatus Status { get; set; }
 
         // те як користувач відображатиметься у інших
@@ -55,16 +37,6 @@ namespace ChatClient.Models
         public IList<Message> ReceivedMessages { get; set; } = new List<Message>();
 
         public DateTime CreatedAt { get; private set; }
-
-        public IPEndPoint GetEndPoint() => new IPEndPoint(_address, _port);
-
-        public void SetIpAndPort(Socket socket)
-        {
-            var endPoint = (IPEndPoint)socket.RemoteEndPoint!;
-
-            _address = endPoint.Address;
-            _port = endPoint.Port;
-        }
 
         // Зайве (поки не видаляти)
         /*

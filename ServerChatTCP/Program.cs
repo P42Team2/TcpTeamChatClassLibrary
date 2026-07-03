@@ -36,6 +36,8 @@ namespace Server
 
         internal static TcpListener listener = new TcpListener(IPAddress.Any, localPort);
 
+        internal static ChatDB_Context context = new ChatDB_Context();
+
         static void Main()
         {
             listener.Start();
@@ -54,7 +56,7 @@ namespace Server
             void HandleClient(TcpClient client)
             {
                 int currentUserId = -1;// якщо від'ємне значення змінної то вона вважається не ініціалізованою
-                ChatDB_Context context = new ChatDB_Context();
+                
                 try
                 {
                     using NetworkStream ns = client.GetStream();
@@ -147,7 +149,6 @@ namespace Server
                                         break;
                                     }
                                     acountUser = new User { Login = dataRegister.Username, Password = dataRegister.Password, Status = UserStatus.Online };
-                                    acountUser.SetIpAndPort(client.Client);
 
                                     lock (_lock)
                                     {
