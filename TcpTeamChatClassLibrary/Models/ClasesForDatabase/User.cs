@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,31 +14,13 @@ namespace ChatClient.Models
         // Мабуть так буде легше
         public User()
         {
-            CreatedAt = DateTime.Now;
+            CreatedAt = DateTime.Now; LastSeen = DateTime.Now;
         }
 
         public int Id { get; set; }
 
         public string Login { get; set; } = default!;
         public string Password { get; set; } = default!;
-
-        private IPAddress _address = IPAddress.Loopback;
-
-        public string IpAddressStr
-        {
-            get
-            {
-                return _address.ToString();
-            }
-            set
-            {
-                if (IPAddress.TryParse(value, out IPAddress? address))
-                {
-                    _address = address;
-                }
-            }
-        }
-        public int Port { get; set; }
 
         public UserStatus Status { get; set; }
 
@@ -50,12 +34,10 @@ namespace ChatClient.Models
         public ICollection<Contact> OwnContacts { get; set; } = new List<Contact>();
         public ICollection<Contact> AddedToContacts { get; set; } = new List<Contact>();
 
-        public IList<Message> SentMessages { get; set; }
-        public IList<Message> ReceivedMessages { get; set; }
+        public IList<Message> SentMessages { get; set; } = new List<Message>();
+        public IList<Message> ReceivedMessages { get; set; } = new List<Message>();
 
         public DateTime CreatedAt { get; private set; }
-
-        public IPEndPoint GetEndPoint() => new IPEndPoint(IPAddress.Parse(IpAddressStr), Port);
 
         // Зайве (поки не видаляти)
         /*
