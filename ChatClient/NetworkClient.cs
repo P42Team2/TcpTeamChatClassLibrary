@@ -161,6 +161,45 @@ namespace ChatClient
                     //
                     // Сюда нужно будет добавлять новые кейсы (ChatsList, NewMessage и т.д.)
                     //
+                    case "ContactsReceived":
+                    case "ContactsList":
+                    case "SearchContactsResult":
+                    case "LoadContactsListResult":
+                        {
+                            var users = DeserializeListPayload<User>(envelope.Payload, "Users", "Contacts", "FoundUsers", "Data", "Items");
+                            OnContactsReceived?.Invoke(users);
+                            break;
+                        }
+
+                    case "NewMessage":
+                    case "MessageReceived":
+                        {
+                            var message = DeserializePayload<Message>(envelope.Payload);
+                            if (message != null)
+                                OnMessageReceived?.Invoke(message);
+                            break;
+                        }
+
+                    case "HistoryReceived":
+                    case "ChatHistory":
+                    case "LoadChatHistoryResult":
+                    case "SearchInChatResult":
+                    case "GlobalMessageSearchResult":
+                        {
+                            var messages = DeserializeListPayload<Message>(envelope.Payload, "Messages", "History", "Results", "Data", "Items");
+                            OnHistoryReceived?.Invoke(messages);
+                            break;
+                        }
+
+                    case "ChatsListReceived":
+                    case "ChatsList":
+                    case "LoadChatsListResult":
+                        {
+                            var chats = DeserializeListPayload<Chat>(envelope.Payload, "Chats", "Data", "Items");
+                            OnChatsListReceived?.Invoke(chats);
+                            break;
+                        }
+
 
                     default:
                         Console.WriteLine($"Неизвестный тип пакета: {envelope.Type}");
@@ -175,44 +214,14 @@ namespace ChatClient
 
         public void Login(string username, string password)
         {
-            if (!_isConnected)
-            {
+            if (!SendRequest("Login", new { Username = username, Password = password }))
                 OnLoginResult?.Invoke(false, "Нет соединения с сервером.");
-                return;
-            }
-
-            var loginData = new { Username = username, Password = password };
-            string internalJson = JsonSerializer.Serialize(loginData);
-
-            var envelope = new NetworkEnvelope
-            {
-                Type = "Login",
-                Payload = internalJson
-            };
-
-            string finalJson = JsonSerializer.Serialize(envelope);
-            _writer.WriteLine(finalJson);
         }
 
         public void Register(string username, string password)
         {
-            if (!_isConnected)
-            {
+            if (!SendRequest("Register", new { Username = username, Password = password }))
                 OnRegisterResult?.Invoke(false, "Нет соединения с сервером.");
-                return;
-            }
-
-            var registerData = new { Username = username, Password = password };
-            string internalJson = JsonSerializer.Serialize(registerData);
-
-            var envelope = new NetworkEnvelope
-            {
-                Type = "Register",
-                Payload = internalJson
-            };
-
-            string finalJson = JsonSerializer.Serialize(envelope);
-            _writer.WriteLine(finalJson);
         }
 
         public void Disconnect()
@@ -240,11 +249,37 @@ namespace ChatClient
         }
 
         // Contacts Management
-        public void SearchContacts(string usernameQuery) { }
-        public void AddContact(int targetUserId) { }
-        public void DeleteContact(int targetUserId) { }
-        public void LoadContactsList() { }
-        public void UpdateContact(int userId, string updatedName) { }
+        public void SearchContacts(string usernameQuery)
+        {
+            if (string.IsNullOrWhiteSpace(usernameQuery))
+            {
+                OnContactsReceived?.Invoke(new List<User>());
+                return;
+            }
+
+            if (!SendRequest("SearchContacts", new { UsernameQuery = usernameQuery }))
+                OnContactsReceived?.Invoke(new List<User>());
+        }
+        public void AddContact(int targetUserId) 
+        {
+            if (!SendRequest("AddContact", new { TargetUserId = targetUserId }))
+                OnContactAddedResult?.Invoke(false, "Нет соединения с сервером.");
+        }
+        public void DeleteContact(int targetUserId) 
+        {
+            if (!SendRequest("DeleteContact", new { TargetUserId = targetUserId }))
+                OnContactDeletedResult?.Invoke(false, targetUserId);
+        }
+        public void LoadContactsList() 
+        {
+            if (!SendRequest("LoadContactsList", new { }))
+                OnContactsReceived?.Invoke(new List<User>());
+        }
+        public void UpdateContact(int userId, string updatedName) 
+        {
+            if (!SendRequest("UpdateContact", new { UserId = userId, UpdatedName = updatedName }))
+                OnContactUpdated?.Invoke(false, userId, updatedName);
+        }
 
         // Black list Management
         public void AddToBlacklist(int targetUserId) { }
@@ -252,12 +287,63 @@ namespace ChatClient
         public void LoadBlacklist() { }
 
         // Chats and Messages
-        public void SendMessage(int chatId, string messageText) { }
-        public void LoadChatHistory(int chatId, int lastMessageId = 0) { }
-        public void CreateGroupChat(string groupName, List<int> memberIds) { }
-        public void SearchInChat(int chatId, string searchQuery) { }
-        public void GlobalMessageSearch(string searchQuery) { }
-        public void LoadChatsList() { }
+        public void SendMessage(int chatId, string messageText)
+        {
+            if (string.IsNullOrWhiteSpace(messageText)) return;
+
+            SendRequest("SendMessage", new
+            {
+                ChatId = chatId,
+                MessageText = messageText
+            });
+        }
+
+        public void LoadChatHistory(int chatId, int lastMessageId = 0)
+        {
+            if (!SendRequest("LoadChatHistory", new { ChatId = chatId, LastMessageId = lastMessageId }))
+                OnHistoryReceived?.Invoke(new List<Message>());
+        }
+
+        public void CreateGroupChat(string groupName, List<int> memberIds)
+        {
+            if (memberIds == null) memberIds = new List<int>();
+
+            SendRequest("CreateGroupChat", new
+            {
+                GroupName = groupName,
+                MemberIds = memberIds
+            });
+        }
+
+        public void SearchInChat(int chatId, string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                OnHistoryReceived?.Invoke(new List<Message>());
+                return;
+            }
+
+            if (!SendRequest("SearchInChat", new { ChatId = chatId, SearchQuery = searchQuery }))
+                OnHistoryReceived?.Invoke(new List<Message>());
+        }
+
+        public void GlobalMessageSearch(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                OnHistoryReceived?.Invoke(new List<Message>());
+                return;
+            }
+
+            if (!SendRequest("GlobalMessageSearch", new { SearchQuery = searchQuery }))
+                OnHistoryReceived?.Invoke(new List<Message>());
+        }
+
+        public void LoadChatsList()
+        {
+            if (!SendRequest("LoadChatsList", new { }))
+                OnChatsListReceived?.Invoke(new List<Chat>());
+        }
 
         // Account`s Settings
         public void ChangePassword(string oldPassword, string newPassword) { }
@@ -265,6 +351,83 @@ namespace ChatClient
 
 
         // вспомогательные функции
+
+        private bool SendRequest(string type, object payload)
+        {
+            if (!_isConnected || _writer == null)
+            {
+                Console.WriteLine($"Нельзя отправить {type}: нет соединения с сервером.");
+                return false;
+            }
+
+            try
+            {
+                string internalJson = payload == null ? "" : JsonSerializer.Serialize(payload, _jsonOptions);
+
+                var envelope = new NetworkEnvelope
+                {
+                    Type = type,
+                    Payload = internalJson
+                };
+                string finalJson = JsonSerializer.Serialize(envelope, _jsonOptions);
+
+                _writer.WriteLine(finalJson);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка отправки запроса {type}: {ex.Message}");
+                return false;
+            }
+        }
+
+        private T DeserializePayload<T>(string payload)
+        {
+            if (string.IsNullOrWhiteSpace(payload)) return default(T);
+            return JsonSerializer.Deserialize<T>(payload, _jsonOptions);
+        }
+
+        private List<T> DeserializeListPayload<T>(string payload, params string[] propertyNames)
+        {
+            if (string.IsNullOrWhiteSpace(payload)) return new List<T>();
+
+            try
+            {
+                // Вариант 1: Payload сразу является массивом: [{...}, {...}]
+                var directList = JsonSerializer.Deserialize<List<T>>(payload, _jsonOptions);
+                if (directList != null) return directList;
+            }
+            catch
+            {
+                // Если это не массив, ниже пробуем разобрать как объект-обертку.
+            }
+
+            try
+            {
+                // Вариант 2: Payload является объектом: { "Users": [{...}, {...}] }
+                using (var document = JsonDocument.Parse(payload))
+                {
+                    if (document.RootElement.ValueKind != JsonValueKind.Object)
+                        return new List<T>();
+
+                    foreach (string propertyName in propertyNames)
+                    {
+                        if (document.RootElement.TryGetProperty(propertyName, out JsonElement element))
+                        {
+                            var list = JsonSerializer.Deserialize<List<T>>(element.GetRawText(), _jsonOptions);
+                            return list ?? new List<T>();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка парсинга списка: {ex.Message}");
+            }
+
+            return new List<T>();
+        }
 
         public void AddContactByNickname(string targetUsername)
         {
