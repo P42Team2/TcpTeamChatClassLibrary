@@ -92,6 +92,8 @@ namespace ChatClient
                 };
                 _receiveThread.Start();
 
+                Thread.Sleep(100);
+
                 Console.WriteLine("Успешное подключение к серверу!");
             }
             catch (Exception ex)
@@ -101,23 +103,30 @@ namespace ChatClient
             }
         }
 
-        // Блок бесконечного слушания сервера
         private void ReceiveMessagesLoop()
         {
             try
             {
-                while (_isConnected && _reader != null)
+                byte[] buffer = new byte[4096];
+                var networkStream = _tcpClient?.GetStream();
+
+                while (_isConnected && networkStream != null)
                 {
-                    // Ждем строку от сервера (сервер должен слать сообщение и в конце '\n')
-                    string rawPacket = _reader.ReadLine();
-                    if (rawPacket == null)
+                    if (!networkStream.DataAvailable)
                     {
-                        // Если прилетел null — сервер разорвал соединение
+                        Thread.Sleep(10);
+                        continue;
+                    }
+
+                    int bytesRead = networkStream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
                         Disconnect();
                         break;
                     }
 
-                    // Передаем сырую строку на разбор в обработчик
+                    string rawPacket = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+
                     ParseServerPacket(rawPacket);
                 }
             }
