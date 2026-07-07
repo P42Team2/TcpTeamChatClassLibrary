@@ -39,9 +39,10 @@
             // 
             // btnLogIn
             // 
-            btnLogIn.Location = new Point(7, 6);
+            btnLogIn.Location = new Point(8, 8);
+            btnLogIn.Margin = new Padding(3, 4, 3, 4);
             btnLogIn.Name = "btnLogIn";
-            btnLogIn.Size = new Size(75, 23);
+            btnLogIn.Size = new Size(86, 31);
             btnLogIn.TabIndex = 0;
             btnLogIn.Text = "Log in";
             btnLogIn.UseVisualStyleBackColor = true;
@@ -49,9 +50,10 @@
             // 
             // btnRegister
             // 
-            btnRegister.Location = new Point(88, 6);
+            btnRegister.Location = new Point(101, 8);
+            btnRegister.Margin = new Padding(3, 4, 3, 4);
             btnRegister.Name = "btnRegister";
-            btnRegister.Size = new Size(75, 23);
+            btnRegister.Size = new Size(86, 31);
             btnRegister.TabIndex = 1;
             btnRegister.Text = "Register";
             btnRegister.UseVisualStyleBackColor = true;
@@ -59,47 +61,53 @@
             // 
             // pnlLogIn
             // 
-            pnlLogIn.Location = new Point(4, 35);
+            pnlLogIn.Location = new Point(5, 47);
+            pnlLogIn.Margin = new Padding(3, 4, 3, 4);
             pnlLogIn.Name = "pnlLogIn";
-            pnlLogIn.Size = new Size(163, 129);
+            pnlLogIn.Size = new Size(186, 172);
             pnlLogIn.TabIndex = 2;
             // 
             // groupBox1
             // 
             groupBox1.Controls.Add(txtPort);
             groupBox1.Controls.Add(txtIP);
-            groupBox1.Location = new Point(4, 170);
+            groupBox1.Location = new Point(5, 227);
+            groupBox1.Margin = new Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(163, 82);
+            groupBox1.Padding = new Padding(3, 4, 3, 4);
+            groupBox1.Size = new Size(186, 109);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
             groupBox1.Text = "Address";
             // 
             // txtPort
             // 
-            txtPort.Location = new Point(6, 51);
+            txtPort.Location = new Point(7, 68);
+            txtPort.Margin = new Padding(3, 4, 3, 4);
             txtPort.Name = "txtPort";
-            txtPort.Size = new Size(100, 23);
+            txtPort.Size = new Size(114, 27);
             txtPort.TabIndex = 5;
-            txtPort.Text = "6767";
+            txtPort.Text = "10000";
             // 
             // txtIP
             // 
-            txtIP.Location = new Point(6, 22);
+            txtIP.Location = new Point(7, 29);
+            txtIP.Margin = new Padding(3, 4, 3, 4);
             txtIP.Name = "txtIP";
-            txtIP.Size = new Size(100, 23);
+            txtIP.Size = new Size(114, 27);
             txtIP.TabIndex = 4;
             txtIP.Text = "127.0.0.1";
             // 
             // LoginForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(171, 255);
+            ClientSize = new Size(195, 340);
             Controls.Add(groupBox1);
             Controls.Add(pnlLogIn);
             Controls.Add(btnRegister);
             Controls.Add(btnLogIn);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "LoginForm";
             Text = "LoginForm";
             FormClosed += LoginForm_FormClosed;
