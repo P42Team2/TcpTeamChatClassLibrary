@@ -96,7 +96,7 @@ namespace Server
 
                                     if (dataLogin == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Invalid data", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, "Invalid data", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -104,13 +104,13 @@ namespace Server
                                     User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataLogin.Username);
                                     if (acountUser == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Login. This account does not exist.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, "Uncorrect Login. This account does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
                                     else if (acountUser.Password != dataLogin.Password)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, JsonSerializer.Serialize("Uncorrect Password.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.LoginError, "Uncorrect Password.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -122,7 +122,7 @@ namespace Server
                                         context.SaveChanges();
                                     }
                                     onlineUsers[currentUserId] = client;
-                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.LoginSuccess, JsonSerializer.Serialize(acountUser, _jsonOptions)), _jsonOptions));
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.LoginSuccess, acountUser, _jsonOptions), _jsonOptions));
                                     _logInfo.Information($"Succes login {dataLogin.Username}\n");
                                     break;
                                 }
@@ -135,7 +135,7 @@ namespace Server
 
                                     if (dataRegister == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.RegisterError, JsonSerializer.Serialize("Invalid data", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.RegisterError, "Invalid data", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -143,7 +143,7 @@ namespace Server
                                     User? acountUser = context.Users.FirstOrDefault(u => u.Login == dataRegister.Username);
                                     if (acountUser != null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.RegisterError, JsonSerializer.Serialize("An account with this login has already been created.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.RegisterError, "An account with this login has already been created.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -162,7 +162,7 @@ namespace Server
                                         context.SaveChanges();
                                     }
                                     onlineUsers[acountUser.Id] = client;
-                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.RegisterSuccess, JsonSerializer.Serialize(acountUser, _jsonOptions)), _jsonOptions));
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.RegisterSuccess, acountUser, _jsonOptions), _jsonOptions));
                                     _logInfo.Information($"Succes registration {dataRegister.Username}\n");
                                     break;
                                 }
@@ -176,7 +176,7 @@ namespace Server
 
                                     if (!context.Users.Any(u => u.Id == msg.ReceiverId))
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, JsonSerializer.Serialize("Account of receiver does not exist", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, "Account of receiver does not exist", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -187,7 +187,7 @@ namespace Server
 
                                     if (contact == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, JsonSerializer.Serialize("Contact does not exist", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, "Contact does not exist", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -207,7 +207,7 @@ namespace Server
                                             StreamWriter writerReceiver = new StreamWriter(nsReceiver);
                                             writerReceiver.AutoFlush = true;
 
-                                            var response = new NetworkResponse(ResponseType.MessageReceived, JsonSerializer.Serialize(message, _jsonOptions));
+                                            var response = new NetworkResponse(ResponseType.MessageReceived, message, _jsonOptions);
                                             string json = JsonSerializer.Serialize(response, _jsonOptions);
                                             writerReceiver.WriteLine(json);
                                             _logInfo.Information("Message sent instantly to online user");
@@ -241,7 +241,7 @@ namespace Server
                                     }
                                     else
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, JsonSerializer.Serialize("uncorrect payload", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, "uncorrect payload", _jsonOptions);
                                         _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. \n client request: {Payload} \n request: id {Id} | login {Login}\n", clientRequest.Payload, request?.Id, request?.Login);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
@@ -249,7 +249,7 @@ namespace Server
 
                                     if (userContact == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("An account with this login/id does not exist.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "An account with this login/id does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -260,7 +260,7 @@ namespace Server
 
                                     if (contact != null)
                                     {
-                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, JsonSerializer.Serialize(contact, _jsonOptions)), _jsonOptions));
+                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions));
                                         break;
                                     }
 
@@ -270,7 +270,7 @@ namespace Server
                                         context.Contacts.Add(contact);
                                         context.SaveChanges();
                                     }
-                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, JsonSerializer.Serialize(contact, _jsonOptions)), _jsonOptions));
+                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions));
                                     break;
                                 }
 
@@ -291,7 +291,7 @@ namespace Server
                                     }
                                     else
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, JsonSerializer.Serialize("uncorrect payload", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, "uncorrect payload", _jsonOptions);
                                         _logWarring.Fatal("Error in RequestType.DeleteContact. Uncorrect payload. \n client request: {Payload} \n request: id {Id} | login {Login}\n", clientRequest.Payload, request?.Id, request?.Login);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
@@ -299,7 +299,7 @@ namespace Server
 
                                     if (userContact == null)
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("An account with this login/id does not exist.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "An account with this login/id does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
@@ -311,7 +311,7 @@ namespace Server
                                     if (contact != null)
                                     {
                                         context.Contacts.Remove(contact);
-                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, "Contact was deleted"), _jsonOptions));
+                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, "Contact was deleted", _jsonOptions), _jsonOptions));
                                         break;
                                     }
                                     break;
@@ -339,7 +339,7 @@ namespace Server
                                     }
                                     else
                                     {
-                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, JsonSerializer.Serialize("A contact with this id does not exist.", _jsonOptions));
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "A contact with this id does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }

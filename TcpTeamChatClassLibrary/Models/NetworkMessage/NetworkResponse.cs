@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace TcpTeamChatClassLibrary.Models.NetworkMessage
 {
@@ -24,12 +25,18 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
     public class NetworkResponse
     {
         public ResponseType Type { get; set; }
-        public string Payload { get; set; }
+        public JsonElement Payload { get; set; }
 
-        public NetworkResponse(ResponseType type, string response)
+        public NetworkResponse() { }
+        public NetworkResponse(ResponseType type, object? response, JsonSerializerOptions options)
         {
             Type = type;
-            Payload = response;
+            Payload = JsonSerializer.SerializeToElement(response, options);
+        }
+        public NetworkResponse(ResponseType type, JsonElement payload)
+        {
+            Type = type;
+            Payload = payload;
         }
     }
 }

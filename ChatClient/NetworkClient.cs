@@ -13,6 +13,7 @@ using TcpTeamChatClassLibrary.Models;
 // з нею буде легше приймати відповіді сервера
 using TcpTeamChatClassLibrary.Models.NetworkMessage;
 using Message = TcpTeamChatClassLibrary.Models.Message;
+using UserStatus = TcpTeamChatClassLibrary.Models.UserStatus;
 
 namespace ChatClient
 {
@@ -226,68 +227,112 @@ namespace ChatClient
             }
         }
 
-        public void Login(string username, string password)
+        public async void Login(string username, string password)
         {
             if (!SendRequest("Login", new { Username = username, Password = password }))
                 OnLoginResult?.Invoke(false, "Нет соединения с сервером.");
             else
             {
-                _ = Task.Run(async () =>
+                try
                 {
-                    try
+                    string? json = await _reader.ReadLineAsync();
+
+                    if (string.IsNullOrWhiteSpace(json))
                     {
-                        string? json = await _reader.ReadLineAsync();
-
-                        if (string.IsNullOrWhiteSpace(json))
-                        {
-                            OnLoginResult?.Invoke(false, "Сервер закрив з'єднання.");
-                            return;
-                        }
-
-                        NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
-
-                        if (response == null)
-                        {
-                            OnLoginResult?.Invoke(false, "Отримано некоректну відповідь сервера.");
-                            return;
-                        }
-
-                        if (response.Type == ResponseType.LoginError)
-                        {
-                            OnLoginResult?.Invoke(false, response.Payload);
-                            return;
-                        }
-
-                        User? user = JsonSerializer.Deserialize<User>(response.Payload, _jsonOptions);
-
-                        if (user == null)
-                        {
-                            OnLoginResult?.Invoke(false, "Не вдалося отримати інформацію про користувача.");
-                            return;
-                        }
-
-                        OnLoginResult?.Invoke(true, user.Id.ToString());
+                        OnLoginResult?.Invoke(false, "Сервер закрив з'єднання.");
+                        return;
                     }
-                    catch (JsonException ex)
+
+                    NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
+                    User? user = null;
+                    if (response == null)
+                        return;
+
+                    switch (response.Type)
                     {
-                        OnLoginResult?.Invoke(false, "Помилка обробки JSON: " + ex.Message);
+                        case ResponseType.LoginSuccess:
+                            {
+                                user = response.Payload.Deserialize<User>(_jsonOptions);
+                                break;
+                            }
+
+                        case ResponseType.LoginError:
+                            {
+                                string? message = response.Payload.Deserialize<string>(_jsonOptions);
+                                OnLoginResult?.Invoke(false, message!);
+                                return;
+                            }
                     }
-                    catch (IOException ex)
-                    {
-                        OnLoginResult?.Invoke(false, "Помилка мережі: " + ex.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        OnLoginResult?.Invoke(false, "Сталася неочікувана помилка.\nДетальніше: " + ex.Message);
-                    }
-                });
+
+                    OnLoginResult?.Invoke(true, user!.Id.ToString());
+                }
+                catch (JsonException ex)
+                {
+                    OnLoginResult?.Invoke(false, "Помилка обробки JSON: " + ex.Message);
+                }
+                catch (IOException ex)
+                {
+                    OnLoginResult?.Invoke(false, "Помилка мережі: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    OnLoginResult?.Invoke(false, "Сталася неочікувана помилка.\nДетальніше: " + ex.Message);
+                }
             }
         }
 
-        public void Register(string username, string password)
+        public async void Register(string username, string password)
         {
             if (!SendRequest("Register", new { Username = username, Password = password }))
                 OnRegisterResult?.Invoke(false, "Нет соединения с сервером.");
+            else
+            {
+                try
+                {
+                    string? json = await _reader.ReadLineAsync();
+
+                    if (string.IsNullOrWhiteSpace(json))
+                    {
+                        OnLoginResult?.Invoke(false, "Сервер закрив з'єднання.");
+                        return;
+                    }
+
+                    NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
+                    User? user = null;
+                    if (response == null)
+                        return;
+
+                    switch (response.Type)
+                    {
+                        case ResponseType.RegisterSuccess:
+                            {
+                                user = response.Payload.Deserialize<User>(_jsonOptions);
+                                break;
+                            }
+
+                        case ResponseType.RegisterError:
+                            {
+                                string? message = response.Payload.Deserialize<string>(_jsonOptions);
+                                OnLoginResult?.Invoke(false, message!);
+                                return;
+                            }
+                    }
+
+                    OnLoginResult?.Invoke(true, user!.Id.ToString());
+                }
+                catch (JsonException ex)
+                {
+                    OnLoginResult?.Invoke(false, "Помилка обробки JSON: " + ex.Message);
+                }
+                catch (IOException ex)
+                {
+                    OnLoginResult?.Invoke(false, "Помилка мережі: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    OnLoginResult?.Invoke(false, "Сталася неочікувана помилка.\nДетальніше: " + ex.Message);
+                }
+            }
         }
 
         public void Disconnect()
