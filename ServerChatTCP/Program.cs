@@ -45,11 +45,11 @@ namespace Server
         static void Main()
         {
             listener.Start();
-            _logInfo.Information($"Server started on port {localPort}");
+            _logInfo.Information($"Server started on port {localPort} \n");
             while (true)
             {
                 TcpClient client = listener.AcceptTcpClient();
-                _logInfo.Information($"[+] Client connected: {client.Client.RemoteEndPoint}");
+                _logInfo.Information($"[+] Client connected: {client.Client.RemoteEndPoint}\n");
                 _ = Task.Run(() => HandleClient(client));
             }
         }
@@ -71,7 +71,7 @@ namespace Server
                     if (jsonRequest == null)
                         break;
 
-                    _logInfo.Information($"Received: {jsonRequest}");
+                    _logInfo.Information($"Received: {jsonRequest}\n");
 
                     // ИСПРАВЛЕНИЕ БАГА: Передаем _jsonOptions для правильного маппинга JSON пакетов
                     using (JsonDocument doc = JsonDocument.Parse(jsonRequest))
@@ -82,7 +82,12 @@ namespace Server
                         string payloadStr = root.GetProperty("Payload").GetString() ?? "";
 
                         if (!Enum.TryParse<RequestType>(requestTypeStr, true, out RequestType parsedType))
+                        {
+                            _logWarring.Fatal("Unknown request\n" +
+                                "Request type: "+requestTypeStr+
+                                "Payload: "+payloadStr+"\n");
                             continue;
+                        }
 
                         var clientRequest = new { Type = parsedType, Payload = payloadStr };
 
@@ -90,7 +95,7 @@ namespace Server
                         {
                             case RequestType.Login:
                                 {
-                                    _logInfo.Information("Login request");
+                                    _logInfo.Information("Login request\n");
                                     // ИСПРАВЛЕНИЕ БАГА: Передаем _jsonOptions во внутренний Payload
                                     LoginAndRegisterRequest? dataLogin = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Payload, _jsonOptions);
 
@@ -129,7 +134,7 @@ namespace Server
 
                             case RequestType.Register:
                                 {
-                                    _logInfo.Information("Register request");
+                                    _logInfo.Information("Register request\n");
                                     // ИСПРАВЛЕНИЕ БАГА: Передаем _jsonOptions во внутренний Payload регистрации
                                     LoginAndRegisterRequest? dataRegister = JsonSerializer.Deserialize<LoginAndRegisterRequest>(clientRequest.Payload, _jsonOptions);
 
@@ -169,7 +174,7 @@ namespace Server
 
                             case RequestType.SendMessage:
                                 {
-                                    _logInfo.Information("Send message request");
+                                    _logInfo.Information("Send message request\n");
                                     SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Payload, _jsonOptions);
                                     if (msg == null)
                                         break;
@@ -210,16 +215,16 @@ namespace Server
                                             var response = new NetworkResponse(ResponseType.MessageReceived, message, _jsonOptions);
                                             string json = JsonSerializer.Serialize(response, _jsonOptions);
                                             writerReceiver.WriteLine(json);
-                                            _logInfo.Information("Message sent instantly to online user");
+                                            _logInfo.Information("Message sent instantly to online user\n");
                                         }
                                         catch (Exception ex)
                                         {
-                                            _logInfo.Information(ex.Message);
+                                            _logWarring.Warning(ex.Message+"\n");
                                         }
                                     }
                                     else
                                     {
-                                        _logInfo.Information("User offline (только сохранено в бд)");
+                                        _logInfo.Information("User offline (только сохранено в бд)\n");
                                     }
                                     break;
                                 }
@@ -227,7 +232,7 @@ namespace Server
                             case RequestType.AddContact:
                                 {
                                     if (currentUserId < 0) break;
-                                    _logInfo.Information("Add contact request");
+                                    _logInfo.Information("Add contact request\n");
                                     var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload, _jsonOptions);
                                     User? userContact = null;
 
@@ -276,7 +281,7 @@ namespace Server
 
                             case RequestType.DeleteContact:
                                 {
-                                    _logInfo.Information("Delete contact request");
+                                    _logInfo.Information("Delete contact request\n");
                                     if (currentUserId < 0) break;
                                     var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload, _jsonOptions);
                                     User? userContact = null;
@@ -318,18 +323,18 @@ namespace Server
                                 }
 
                             case RequestType.AddToBlacklist:
-                                _logInfo.Information("Add to blacklist request");
+                                _logInfo.Information("Add to blacklist request\n");
                                 break;
                             case RequestType.RemoveFromBlacklist:
-                                _logInfo.Information("Remove from blacklist request");
+                                _logInfo.Information("Remove from blacklist request\n");
                                 break;
                             case RequestType.LoadBlacklist:
-                                _logInfo.Information("Load blacklist request");
+                                _logInfo.Information("Load blacklist request\n");
                                 break;
 
                             case RequestType.LoadChatHistory:
                                 {
-                                    _logInfo.Information("Load history request");
+                                    _logInfo.Information("Load history request\n");
                                     int contactId = JsonSerializer.Deserialize<int>(clientRequest.Payload, _jsonOptions);
                                     if (context.Contacts.Any(c => c.Id == contactId))
                                     {
@@ -346,19 +351,22 @@ namespace Server
                                 }
 
                             case RequestType.CreateGroupChat:
-                                _logInfo.Information("Create group request");
+                                _logInfo.Information("Create group request\n");
                                 break;
                             case RequestType.SearchContacts:
-                                _logInfo.Information("Search contacts request");
+                                _logInfo.Information("Search contacts request\n");
                                 break;
                             case RequestType.SearchInChat:
-                                _logInfo.Information("Search in chat request");
+                                _logInfo.Information("Search in chat request\n");
                                 break;
                             case RequestType.GlobalMessageSearch:
-                                _logInfo.Information("Global search request");
+                                _logInfo.Information("Global search request\n");
                                 break;
                             default:
-                                _logInfo.Information("Unknown request");
+                                _logWarring.Fatal("Unknown request\n" +
+                                    "Невідомими чином воно пройшло через перевірку\n" +
+                                    "if (!Enum.TryParse<RequestType>(requestTypeStr, true, out RequestType parsedType))\n" +
+                                    "continue;\n" );
                                 break;
                         }
                     }
