@@ -37,7 +37,7 @@ namespace ChatClient
         private StreamReader _reader;
         private StreamWriter _writer;
         private Thread _receiveThread;
-        private bool _isConnected;
+        public bool isConnected {  get; private set; }
 
         // Настройка, чтобы C# не ругался, если сервер пришлет "type" вместо "Type"
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
@@ -69,7 +69,7 @@ namespace ChatClient
         {
             try
             {
-                if (_isConnected) return;
+                if (isConnected) return;
 
                 ServerIP = ip;
                 ServerPort = port;
@@ -83,7 +83,7 @@ namespace ChatClient
                 _reader = new StreamReader(networkStream, Encoding.UTF8);
                 _writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true };
 
-                _isConnected = true;
+                isConnected = true;
 
                 // Запускаем фоновый поток, который бесконечно слушает ответы от сервера
                 _receiveThread = new Thread(ReceiveMessagesLoop)
@@ -99,7 +99,7 @@ namespace ChatClient
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка подключения: {ex.Message}");
-                _isConnected = false;
+                isConnected = false;
             }
         }
 
@@ -110,7 +110,7 @@ namespace ChatClient
                 byte[] buffer = new byte[4096];
                 var networkStream = _tcpClient?.GetStream();
 
-                while (_isConnected && networkStream != null)
+                while (isConnected && networkStream != null)
                 {
                     if (!networkStream.DataAvailable)
                     {
@@ -235,8 +235,8 @@ namespace ChatClient
 
         public void Disconnect()
         {
-            if (!_isConnected) return;
-            _isConnected = false;
+            if (!isConnected) return;
+            isConnected = false;
 
             try
             {
@@ -363,7 +363,7 @@ namespace ChatClient
 
         private bool SendRequest(string type, object payload)
         {
-            if (!_isConnected || _writer == null)
+            if (!isConnected || _writer == null)
             {
                 Console.WriteLine($"Нельзя отправить {type}: нет соединения с сервером.");
                 return false;

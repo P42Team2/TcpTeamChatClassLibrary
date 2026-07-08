@@ -50,5 +50,11 @@ namespace ChatClient
         {
             Application.Exit();
         }
+
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            Program.NetworkClient.Connect(txtIP.Text, int.Parse(txtPort.Text));
+            label1.Text = Program.NetworkClient.isConnected.ToString();
+        }
     }
 }

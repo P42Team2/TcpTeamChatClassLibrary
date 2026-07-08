@@ -32,6 +32,8 @@
             btnRegister = new Button();
             pnlLogIn = new Panel();
             groupBox1 = new GroupBox();
+            btnConnect = new Button();
+            label1 = new Label();
             txtPort = new TextBox();
             txtIP = new TextBox();
             groupBox1.SuspendLayout();
@@ -69,6 +71,8 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(btnConnect);
+            groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(txtPort);
             groupBox1.Controls.Add(txtIP);
             groupBox1.Location = new Point(5, 227);
@@ -79,6 +83,25 @@
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
             groupBox1.Text = "Address";
+            // 
+            // btnConnect
+            // 
+            btnConnect.Location = new Point(83, 0);
+            btnConnect.Name = "btnConnect";
+            btnConnect.Size = new Size(94, 29);
+            btnConnect.TabIndex = 7;
+            btnConnect.Text = "Connect";
+            btnConnect.UseVisualStyleBackColor = true;
+            btnConnect.Click += btnConnect_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(127, 29);
+            label1.Name = "label1";
+            label1.Size = new Size(53, 20);
+            label1.TabIndex = 6;
+            label1.Text = "isConn";
             // 
             // txtPort
             // 
@@ -124,5 +147,7 @@
         private GroupBox groupBox1;
         private TextBox txtPort;
         private TextBox txtIP;
+        private Label label1;
+        private Button btnConnect;
     }
 }
