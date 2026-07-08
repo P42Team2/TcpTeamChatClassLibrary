@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 
-namespace ChatClient.Models
+namespace TcpTeamChatClassLibrary.Models
 {
     public class ChatDB_Context : DbContext
     {

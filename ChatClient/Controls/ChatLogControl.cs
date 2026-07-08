@@ -7,7 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Message = ChatClient.Models.Message;
+using TcpTeamChatClassLibrary.Models;
+using Message = TcpTeamChatClassLibrary.Models.Message;
 
 namespace ChatClient.Controls
 {
@@ -43,7 +44,9 @@ namespace ChatClient.Controls
         private void NetworkClient_OnMessageReceived(Message msg)
         {
             // Проверяем: это сообщение прилетело ИМЕННО в тот чат, который сейчас открыт на экране
-            if (msg.ChatId == _chatId)
+            // В нас немає чатів є лише контакти. Тому я тут змінив код
+            // часу занадто мало тепер
+            if (msg.ContactId == _chatId)
             {
                 this.Invoke((MethodInvoker)delegate
                 {

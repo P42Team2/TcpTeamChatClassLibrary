@@ -1,5 +1,5 @@
 using ChatClient.Controls;
-using ChatClient.Models;
+using TcpTeamChatClassLibrary.Models;
 
 namespace ChatClient
 {

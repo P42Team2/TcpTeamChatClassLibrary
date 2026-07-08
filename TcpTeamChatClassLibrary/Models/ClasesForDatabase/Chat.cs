@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatClient.Models
+namespace TcpTeamChatClassLibrary.Models
 {
     // new class
     public class Chat

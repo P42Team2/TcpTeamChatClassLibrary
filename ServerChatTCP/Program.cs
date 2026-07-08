@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using TcpTeamChatClassLibrary.Models.DTO;
 using TcpTeamChatClassLibrary.Models.NetworkMessage;
-using ChatClient.Models;
+using TcpTeamChatClassLibrary.Models;
 using Serilog;
 using Serilog.Core;
 

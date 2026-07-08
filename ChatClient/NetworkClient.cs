@@ -1,13 +1,18 @@
-﻿using ChatClient.Models;
+﻿//using ChatClient.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Text.Json;     
-using Message = ChatClient.Models.Message;
+using System.Threading.Tasks;
+using Azure;
+// Поточна бібліотека бази данних
+using TcpTeamChatClassLibrary.Models;
+// Бібліотека написана Дмитром
+// з нею буде легше приймати відповіді сервера
+using TcpTeamChatClassLibrary.Models.NetworkMessage;
+using Message = TcpTeamChatClassLibrary.Models.Message;
 
 namespace ChatClient
 {
@@ -225,6 +230,58 @@ namespace ChatClient
         {
             if (!SendRequest("Login", new { Username = username, Password = password }))
                 OnLoginResult?.Invoke(false, "Нет соединения с сервером.");
+            else
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        string? json = await _reader.ReadLineAsync();
+
+                        if (string.IsNullOrWhiteSpace(json))
+                        {
+                            OnLoginResult?.Invoke(false, "Сервер закрив з'єднання.");
+                            return;
+                        }
+
+                        NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
+
+                        if (response == null)
+                        {
+                            OnLoginResult?.Invoke(false, "Отримано некоректну відповідь сервера.");
+                            return;
+                        }
+
+                        if (response.Type == ResponseType.LoginError)
+                        {
+                            OnLoginResult?.Invoke(false, response.Payload);
+                            return;
+                        }
+
+                        User? user = JsonSerializer.Deserialize<User>(response.Payload, _jsonOptions);
+
+                        if (user == null)
+                        {
+                            OnLoginResult?.Invoke(false, "Не вдалося отримати інформацію про користувача.");
+                            return;
+                        }
+
+                        OnLoginResult?.Invoke(true, user.Id.ToString());
+                    }
+                    catch (JsonException ex)
+                    {
+                        OnLoginResult?.Invoke(false, "Помилка обробки JSON: " + ex.Message);
+                    }
+                    catch (IOException ex)
+                    {
+                        OnLoginResult?.Invoke(false, "Помилка мережі: " + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        OnLoginResult?.Invoke(false, "Сталася неочікувана помилка.\nДетальніше: " + ex.Message);
+                    }
+                });
+            }
         }
 
         public void Register(string username, string password)
