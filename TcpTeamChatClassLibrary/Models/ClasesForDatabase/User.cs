@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +20,17 @@ namespace TcpTeamChatClassLibrary.Models
         public int Id { get; set; }
 
         public string Login { get; set; } = default!;
-        public string Password { get; set; } = default!;
+        private string _hashPassword = string.Empty;
+
+        public string Password
+        {
+            get => _hashPassword;
+            set => _hashPassword = GetHash(value);
+        }
+        public bool VerifyPassword(string password)
+        {
+            return _hashPassword == GetHash(password);
+        }
 
         public UserStatus Status { get; set; }
 
@@ -37,6 +48,25 @@ namespace TcpTeamChatClassLibrary.Models
         public IList<Message> ReceivedMessages { get; set; } = new List<Message>();
 
         public DateTime CreatedAt { get; private set; }
+
+
+
+        private static string GetHash(string password)
+        {
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                StringBuilder sb = new StringBuilder();
+
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+
+                return sb.ToString();
+            }
+        }
 
         // Зайве (поки не видаляти)
         /*

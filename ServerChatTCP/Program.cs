@@ -114,7 +114,7 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
-                                    else if (acountUser.Password != dataLogin.Password)
+                                    else if (acountUser.VerifyPassword(dataLogin.Password))
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.LoginError, "Uncorrect Password.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
