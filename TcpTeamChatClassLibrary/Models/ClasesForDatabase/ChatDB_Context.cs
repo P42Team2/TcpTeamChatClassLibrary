@@ -36,15 +36,7 @@ namespace TcpTeamChatClassLibrary.Models
                 .HasForeignKey(u=>u.OwnerUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Message>()
-                .HasOne(m => m.Sender)
-                .WithMany(u => u.SentMessages)
-                .HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Message>()
-                .HasOne(m => m.Receiver)
-                .WithMany(u => u.ReceivedMessages)
-                .HasForeignKey(m => m.ReceiverId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Contact>()
                 .HasOne(c => c.ContactUser)
@@ -55,7 +47,7 @@ namespace TcpTeamChatClassLibrary.Models
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.Contact)
                 .WithMany(u => u.Messages)
-                .HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

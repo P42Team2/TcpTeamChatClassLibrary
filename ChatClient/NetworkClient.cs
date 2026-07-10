@@ -7,11 +7,15 @@ using System.Text;
 using System.Text.Json;     
 using System.Threading.Tasks;
 using Azure;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
 // Поточна бібліотека бази данних
 using TcpTeamChatClassLibrary.Models;
 // Бібліотека написана Дмитром
 // з нею буде легше приймати відповіді сервера
 using TcpTeamChatClassLibrary.Models.NetworkMessage;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Message = TcpTeamChatClassLibrary.Models.Message;
 using UserStatus = TcpTeamChatClassLibrary.Models.UserStatus;
 
@@ -43,7 +47,17 @@ namespace ChatClient
         private StreamReader _reader;
         private StreamWriter _writer;
         private Thread _receiveThread;
+
+        private ManualResetEvent _manualReset = new ManualResetEvent(false);
+
         public bool isConnected {  get; private set; }
+
+        // Логер - свята річ
+        private static Logger _log = new LoggerConfiguration().MinimumLevel.Verbose()
+            .WriteTo.File(
+                "logs/app-.txt",
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
         // Настройка, чтобы C# не ругался, если сервер пришлет "type" вместо "Type"
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
@@ -360,7 +374,7 @@ namespace ChatClient
         }
 
         // Contacts Management
-        public async Task SearchContacts(string usernameQuery)
+        public void SearchContacts(string usernameQuery)
         {
             if (string.IsNullOrWhiteSpace(usernameQuery))
             {
@@ -372,7 +386,7 @@ namespace ChatClient
                 OnContactsReceived?.Invoke(new List<User>());
             else
             {
-                string? json = await _reader.ReadLineAsync();
+                string? json = _reader.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(json))
                 {
@@ -415,13 +429,48 @@ namespace ChatClient
         }
         public void DeleteContact(int targetUserId) 
         {
-            if (!SendRequest("DeleteContact", new { TargetUserId = targetUserId }))
+            if (!SendRequest("DeleteContact", new { Id = targetUserId }))
                 OnContactDeletedResult?.Invoke(false, targetUserId);
         }
         public void LoadContactsList() 
         {
             if (!SendRequest("LoadContactsList", new { }))
                 OnContactsReceived?.Invoke(new List<User>());
+            else
+            {
+                string? json = _reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    OnContactsReceived?.Invoke(new List<User>());
+                    return;
+                }
+                NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
+                List<User>? users = null;
+                if (response == null)
+                {
+                    OnContactsReceived?.Invoke(new List<User>());
+                    return;
+                }
+
+                switch (response.Type)
+                {
+                    case ResponseType.SuccessContactRequest:
+                        {
+                            users = response.Payload.Deserialize<List<User>>(_jsonOptions);
+                            if (users == null)
+                                users = new List<User>();
+                            break;
+                        }
+
+                    case ResponseType.UnexpectedError:
+                        {
+                            string? message = response.Payload.Deserialize<string>(_jsonOptions);
+                            OnContactsReceived?.Invoke(new List<User>());
+                            return;
+                        }
+                }
+                OnContactsReceived?.Invoke(users!);
+            }
         }
         public void UpdateContact(int userId, string updatedName) 
         {
@@ -446,10 +495,52 @@ namespace ChatClient
             });
         }
 
+        // Окрема відправка повідомленнь для контакту
+        public void SendMessage(int senderId, int receinerId, string messageText)
+        {
+            if (string.IsNullOrWhiteSpace(messageText)) return;
+
+            SendRequest("SendMessageToContact", new
+            {
+                ReceiverId = receinerId,
+                SenderId = senderId,
+                Text = messageText
+            });
+        }
+
         public void LoadChatHistory(int chatId, int lastMessageId = 0)
         {
             if (!SendRequest("LoadChatHistory", new { ChatId = chatId, LastMessageId = lastMessageId }))
                 OnHistoryReceived?.Invoke(new List<Message>());
+        }
+        public Contact? LoadContactHistory(int receiverId)
+        {
+            if (!SendRequest("LoadContactHistory", receiverId))
+                OnHistoryReceived?.Invoke(new List<Message>());
+            else
+            {
+                string? json = _reader.ReadLine();
+                _log.Verbose("LoadContactHistory\n" +
+                    "Received json from server: "+json+'\n');
+                if(json == null)
+                { OnHistoryReceived?.Invoke(new List<Message>()); return null; }
+                _log.Verbose("1\n");
+
+                NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json);
+                if (response == null)
+                { OnHistoryReceived?.Invoke(new List<Message>()); return null; }
+                if (response.Type==ResponseType.UserDoesNotExist)
+                { OnHistoryReceived?.Invoke(new List<Message>()); return null; }
+                _log.Verbose("2\n");
+
+                Contact? contact = response.Payload.Deserialize<Contact>();
+                if(contact == null)
+                { OnHistoryReceived?.Invoke(new List<Message>()); return null; }
+                _log.Verbose("3\n");
+
+                return contact;
+            }
+            return null;
         }
 
         public void CreateGroupChat(string groupName, List<int> memberIds)
@@ -577,7 +668,7 @@ namespace ChatClient
             return new List<T>();
         }
 
-        public async void AddContactByNickname(string targetUsername)
+        public void AddContactByNickname(string targetUsername)
         {
             if (string.IsNullOrEmpty(targetUsername)) return;
 
@@ -605,8 +696,7 @@ namespace ChatClient
             };
 
             OnContactsReceived += temporaryHandler;
-
-            await SearchContacts(targetUsername);
+            Task.Run(() => Program.NetworkClient.SearchContacts(targetUsername));
         }
     }
 }

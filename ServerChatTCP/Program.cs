@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Core;
 using TcpTeamChatClassLibrary.Models;
@@ -236,6 +237,7 @@ namespace Server
                                     _logInfo.Information("Add contact request\n");
                                     var request = JsonSerializer.Deserialize<ContactRequest>(clientRequest.Payload, _jsonOptions);
                                     User? userContact = null;
+                                    User current = context.Users.First(u=>u.Id==currentUserId);
 
                                     if (request?.Id != null)
                                     {
@@ -247,38 +249,54 @@ namespace Server
                                     }
                                     else
                                     {
+                                        /*
                                         var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, "uncorrect payload", _jsonOptions);
                                         _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. \n client request: {Payload} \n request: id {Id} | login {Login}\n", clientRequest.Payload, request?.Id, request?.Login);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
+                                        */
                                         break;
                                     }
 
                                     if (userContact == null)
                                     {
+                                        /*
                                         var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "An account with this login/id does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
+                                        */
                                         break;
                                     }
 
-                                    Contact? contact = context.Contacts.FirstOrDefault(c =>
-                                        (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id) ||
-                                        (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
+                                    Contact? ownContact = context.Contacts.FirstOrDefault(c => (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id));
+                                    Contact? addToContact = context.Contacts.FirstOrDefault(c => (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
 
-                                    if (contact != null)
+                                    if (ownContact != null)
                                     {
-                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions));
+                                        if(addToContact == null) 
+                                        {
+                                            lock (_lock)
+                                            {
+                                                addToContact = new Contact { OwnerUserId = userContact.Id, ContactUserId = currentUserId, DisplayName = current.Nickname, AddedAt = DateTime.Now };
+                                                context.Contacts.Add(addToContact);
+                                                context.SaveChanges();
+                                            }
+                                        }
+                                        //writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, ownContact, _jsonOptions), _jsonOptions));
                                         break;
                                     }
 
-                                    contact = new Contact { OwnerUserId = currentUserId, ContactUserId = userContact.Id, DisplayName = null, AddedAt = DateTime.Now };
+                                    ownContact = new Contact { OwnerUserId = currentUserId, ContactUserId = userContact.Id, DisplayName = userContact.Nickname, AddedAt = DateTime.Now };
+                                    addToContact = new Contact { OwnerUserId = userContact.Id, ContactUserId = currentUserId, DisplayName = current.Nickname, AddedAt = DateTime.Now };
                                     lock (_lock)
                                     {
-                                        context.Contacts.Add(contact);
+                                        context.Contacts.Add(addToContact);
+                                        context.Contacts.Add(ownContact);
                                         context.SaveChanges();
                                     }
-                                    string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions);
+                                    /*
+                                    string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, ownContact, _jsonOptions), _jsonOptions);
                                     writer.WriteLine(jsonResponse);
                                     _logInfo.Debug(jsonResponse);
+                                    */
                                     _logInfo.Information("Succes add contact request\n");
                                     break;
                                 }
@@ -313,16 +331,18 @@ namespace Server
                                         break;
                                     }
 
-                                    Contact? contact = context.Contacts.FirstOrDefault(c =>
-                                        (c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id) ||
-                                        (c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId));
-
-                                    if (contact != null)
+                                    Contact? contact1 = context.Contacts.FirstOrDefault(c => c.OwnerUserId == currentUserId && c.ContactUserId == userContact.Id);
+                                    Contact? contact2 = context.Contacts.FirstOrDefault(c => c.OwnerUserId == userContact.Id && c.ContactUserId == currentUserId);
+                                    if (contact2 != null)
                                     {
-                                        context.Contacts.Remove(contact);
-                                        writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, "Contact was deleted", _jsonOptions), _jsonOptions));
-                                        break;
+                                        context.Contacts.Remove(contact2);
                                     }
+                                    if (contact1 != null)
+                                    {
+                                        context.Contacts.Remove(contact1);
+                                        //writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, "Contact was deleted", _jsonOptions), _jsonOptions));
+                                    }
+                                    context.SaveChanges();
                                     break;
                                 }
 
@@ -353,14 +373,20 @@ namespace Server
                                         break;
                                     }
                                 }
+
                             case RequestType.LoadContactHistory:
                                 {
-                                    _logInfo.Information("Load history request\n");
-                                    int contactId = JsonSerializer.Deserialize<int>(clientRequest.Payload, _jsonOptions);
-                                    if (context.Contacts.Any(c => c.Id == contactId))
+                                    //_logInfo.Information("Load history request\n");
+                                    int receiverId = JsonSerializer.Deserialize<int>(clientRequest.Payload, _jsonOptions);
+                  
+                                    Contact? contact = context.Contacts.Include(c=>c.Messages).FirstOrDefault(c => c.ContactUserId==receiverId && c.OwnerUserId==currentUserId);
+                                    if (contact!=null)
                                     {
-                                        Message[] chatHistory = context.Contacts.First(c => c.Id == contactId).Messages.ToArray();
-                                        writer.WriteLine(JsonSerializer.Serialize(chatHistory, _jsonOptions));
+                                        NetworkResponse response = new NetworkResponse(ResponseType.MessageReceived, contact, _jsonOptions);
+                                        string jsonResponse = JsonSerializer.Serialize(response, _jsonOptions);
+                                        writer.WriteLine(jsonResponse);
+                                        //_logInfo.Debug($"Contact id: {contact.Id}");
+                                        //_logInfo.Information("Succes load history request\n");
                                         break;
                                     }
                                     else
@@ -374,6 +400,7 @@ namespace Server
                             case RequestType.CreateGroupChat:
                                 _logInfo.Information("Create group request\n");
                                 break;
+
                             case RequestType.SearchContacts:
                                 {
                                     _logInfo.Information("Search contacts request\n");
@@ -409,22 +436,109 @@ namespace Server
                                     _logInfo.Information("Succes search contacts request\n");
                                     break;
                                 }
+                            
                             case RequestType.SearchInChat:
                                 _logInfo.Information("Search in chat request\n");
                                 break;
+                            
                             case RequestType.GlobalMessageSearch:
                                 _logInfo.Information("Global search request\n");
                                 break;
+                            
                             case RequestType.LoadContactsList:
                                 {
                                     _logInfo.Information("Load contacts list reqest");
+                                    User? currentU = context.Users
+                                        .Include(u => u.OwnContacts)
+                                            .ThenInclude(c => c.ContactUser)
+                                        .FirstOrDefault(u => u.Id == currentUserId);
+
+                                    if (currentU == null) { break; }
+                                    if (currentU.OwnContacts.Count==0) { break; }
+
+                                    List<User> users = new List<User>();
+
+                                    foreach (Contact contact in currentU.OwnContacts)
+                                    {
+                                        users.Add(contact.ContactUser);
+                                    }
+
+                                    string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, users, _jsonOptions), _jsonOptions);
+                                    writer.WriteLine(jsonResponse);
+                                    _logInfo.Debug(jsonResponse);
+                                    if (users.Count == 0)
+                                    {
+                                        _logInfo.Information("Such users do not exist.\n");
+                                        break;
+                                    }
+                                    _logInfo.Information("Succes load contacts list request\n");
                                     break;
                                 }
+                            
                             case RequestType.LoadChatsList:
                                 {
-                                    _logInfo.Information("Load chats list reqest");
+                                    _logInfo.Information("Load chats list reqest\n");
                                     break;
                                 }
+
+                            case RequestType.SendMessageToContact:
+                                {
+                                    _logInfo.Information("Send message request\n");
+                                    SendMessageRequest? msg = JsonSerializer.Deserialize<SendMessageRequest>(clientRequest.Payload, _jsonOptions);
+                                    if (msg == null)
+                                        break;
+
+                                    if (!context.Users.Any(u => u.Id == msg.ReceiverId))
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, "Account of receiver does not exist", _jsonOptions);
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
+                                        break;
+                                    }
+
+                                    Contact? receiveContact = context.Contacts.FirstOrDefault(c => c.OwnerUserId == msg.ReceiverId && c.ContactUserId == msg.SenderId);
+                                    Contact? ownContact = context.Contacts.FirstOrDefault(c => c.OwnerUserId == msg.SenderId && c.ContactUserId == msg.ReceiverId);
+
+                                    if (receiveContact == null)
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.MessageError, "Contact does not exist", _jsonOptions);
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
+                                        break;
+                                    }
+
+                                    Message message1 = new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now, ContactId = ownContact!.Id };
+                                    Message message2 = new Message { Text = msg.Text, ReceiverId = msg.ReceiverId, SenderId = msg.SenderId, TimeWhenMessageSended = DateTime.Now, ContactId = receiveContact!.Id };
+                                    lock (_lock)
+                                    {
+                                        context.Messages.Add(message1);
+                                        context.Messages.Add(message2);
+                                        context.SaveChanges();
+                                    }
+
+                                    if (onlineUsers.TryGetValue(msg.ReceiverId, out TcpClient? receiverClient))
+                                    {
+                                        try
+                                        {
+                                            NetworkStream nsReceiver = receiverClient.GetStream();
+                                            StreamWriter writerReceiver = new StreamWriter(nsReceiver);
+                                            writerReceiver.AutoFlush = true;
+
+                                            var response = new NetworkResponse(ResponseType.MessageReceived, message1, _jsonOptions);
+                                            string json = JsonSerializer.Serialize(response, _jsonOptions);
+                                            writerReceiver.WriteLine(json);
+                                            _logInfo.Information("Message sent instantly to online user\n");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _logWarring.Warning(ex.Message+"\n");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _logInfo.Information("User offline (только сохранено в бд)\n");
+                                    }
+                                    break;
+                                }
+                            
                             default:
                                 _logWarring.Fatal("Unknown request\n" +
                                     "Невідомими чином воно пройшло через перевірку\n" +
@@ -450,7 +564,7 @@ namespace Server
                         User current = context.Users.First(u => u.Id == currentUserId);
                         current.Status = UserStatus.Offline;
                         current.LastSeen = DateTime.UtcNow;
-                        context.SaveChanges();
+                        context.SaveChangesAsync();
                     }
                 }
                 _logInfo.Information("Client connection closed");

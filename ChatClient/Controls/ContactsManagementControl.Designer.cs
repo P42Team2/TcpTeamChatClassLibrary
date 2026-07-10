@@ -31,6 +31,10 @@
             label1 = new Label();
             txtSearch = new TextBox();
             panel1 = new Panel();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            btnToChat = new Button();
             btnAdd = new Button();
             btnBlock = new Button();
             btnDelete = new Button();
@@ -61,6 +65,10 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(label5);
+            panel1.Controls.Add(label4);
+            panel1.Controls.Add(label3);
+            panel1.Controls.Add(btnToChat);
             panel1.Controls.Add(btnAdd);
             panel1.Controls.Add(btnBlock);
             panel1.Controls.Add(btnDelete);
@@ -73,6 +81,44 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(228, 600);
             panel1.TabIndex = 10;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(3, 158);
+            label5.Name = "label5";
+            label5.Size = new Size(145, 20);
+            label5.TabIndex = 18;
+            label5.Text = "та натисніть To chat";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(3, 138);
+            label4.Name = "label4";
+            label4.Size = new Size(152, 20);
+            label4.TabIndex = 17;
+            label4.Text = "оберіть користувача";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(-1, 118);
+            label3.Name = "label3";
+            label3.Size = new Size(211, 20);
+            label3.TabIndex = 16;
+            label3.Text = "Щоб почати переписуватись";
+            // 
+            // btnToChat
+            // 
+            btnToChat.Location = new Point(3, 67);
+            btnToChat.Margin = new Padding(3, 4, 3, 4);
+            btnToChat.Name = "btnToChat";
+            btnToChat.Size = new Size(219, 47);
+            btnToChat.TabIndex = 14;
+            btnToChat.Text = "To chat";
+            btnToChat.UseVisualStyleBackColor = true;
+            btnToChat.Click += btnToChat_Click;
             // 
             // btnAdd
             // 
@@ -168,5 +214,9 @@
         private Button btnAdd;
         private Label label2;
         private ListView lvContacts;
+        private Label label3;
+        private Button btnToChat;
+        private Label label5;
+        private Label label4;
     }
 }

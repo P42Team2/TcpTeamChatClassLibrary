@@ -9,10 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TcpTeamChatClassLibrary\TcpTeamChatClassLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\ContactLogControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

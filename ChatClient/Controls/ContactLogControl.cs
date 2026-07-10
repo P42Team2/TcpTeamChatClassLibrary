@@ -12,32 +12,61 @@ using Message = TcpTeamChatClassLibrary.Models.Message;
 
 namespace ChatClient.Controls
 {
-    public partial class ChatLogControl : UserControl
+    public partial class ContactLogControl : UserControl
     {
         private Main _mainForm;
-        private int _chatId;
+        private Contact? _contact = null;
+        private CancellationTokenSource _isCancelledToken = new CancellationTokenSource();
+        private int _receiverId;
 
         // Храним список сообщений этого чата в памяти для локального поиска
-        private List<Message> _currentChatMessages = new List<Message>();
+        private List<Message> _currentContactMessages = new List<Message>();
 
-        public ChatLogControl(Main mainForm, int chatId)
+        public ContactLogControl(Main mainForm, int receiverId)
         {
             InitializeComponent();
             _mainForm = mainForm;
-            _chatId = chatId;
+            _receiverId = receiverId;
 
             Program.NetworkClient.OnMessageReceived += NetworkClient_OnMessageReceived;
             Program.NetworkClient.OnHistoryReceived += NetworkClient_OnHistoryReceived;
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
 
-            Program.NetworkClient.LoadChatHistory(_chatId);
+                BeginInvoke(() =>
+                {
+                    _contact = Program.NetworkClient.LoadContactHistory(receiverId);
+                    if (_contact == null)
+                    {
+                        lblContactName.Text = "NULL"; return;
+                    }
+                    lblContactName.Text = _contact.DisplayName;
+                    NetworkClient_OnHistoryReceived(_contact.Messages.ToList());
+                });
+
+                while (true)
+                {
+                    await Task.Delay(1500);
+                    _isCancelledToken.Token.ThrowIfCancellationRequested();
+                    BeginInvoke(() =>
+                    {
+                        _contact = Program.NetworkClient.LoadContactHistory(_receiverId);
+                        if (_contact != null)
+                        {
+                            NetworkClient_OnHistoryReceived(_contact.Messages.ToList());
+                        }
+                    });
+                }
+            });
         }
 
         private void NetworkClient_OnHistoryReceived(List<Message> messages)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                _currentChatMessages = messages;
-                DisplayMessages(_currentChatMessages);
+                _currentContactMessages = messages;
+                DisplayMessages(_currentContactMessages);
             });
         }
 
@@ -46,11 +75,13 @@ namespace ChatClient.Controls
             // Проверяем: это сообщение прилетело ИМЕННО в тот чат, который сейчас открыт на экране
             // В нас немає чатів є лише контакти. Тому я тут змінив код
             // часу занадто мало тепер
-            if (msg.ContactId == _chatId)
+            if(_contact==null) return;
+
+            if (msg.ContactId == _contact.Id)
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    _currentChatMessages.Add(msg);
+                    _currentContactMessages.Add(msg);
 
                     // Если в данный момент в поиске ничего не введено, просто дописываем его на экран
                     if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
@@ -68,10 +99,12 @@ namespace ChatClient.Controls
 
         private void btnSend_Click(object sender, EventArgs e)
         {
+            if (_contact == null) return;
+
             string text = txtInput.Text.Trim();
             if (string.IsNullOrEmpty(text)) return;
 
-            Program.NetworkClient.SendMessage(_chatId, text);
+            Program.NetworkClient.SendMessage(_mainForm.CurrentUserId, _receiverId, text);
             txtInput.Clear();
         }
 
@@ -85,12 +118,12 @@ namespace ChatClient.Controls
         {
             if (string.IsNullOrEmpty(query))
             {
-                DisplayMessages(_currentChatMessages);
+                DisplayMessages(_currentContactMessages);
             }
             else
             {
-                var filtered = _currentChatMessages
-                    .Where(m => m.Text.Contains(query, StringComparison.OrdinalIgnoreCase)) //|| m.Sender.Nickname.Contains(query, StringComparison.OrdinalIgnoreCase))
+                var filtered = _currentContactMessages
+                    .Where(m => m.Text.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 DisplayMessages(filtered);
@@ -110,8 +143,14 @@ namespace ChatClient.Controls
         private void AppendMessageToRichTextBox(Message msg)
         {
             rtbChatHistory.SelectionFont = new Font(rtbChatHistory.Font, FontStyle.Bold);
-            //rtbChatHistory.AppendText($"{msg.Sender.Nickname}: ");
-
+            if (msg.SenderId == _mainForm.CurrentUserId)
+            {
+                rtbChatHistory.AppendText("You: ");
+            }
+            else
+            {
+                rtbChatHistory.AppendText($"{_contact!.DisplayName}: ");
+            }
             rtbChatHistory.SelectionFont = new Font(rtbChatHistory.Font, FontStyle.Regular);
             rtbChatHistory.AppendText($"{msg.Text}\r\n");
 
@@ -120,6 +159,8 @@ namespace ChatClient.Controls
 
         private void Control_Disposed(object sender, ControlEventArgs e)
         {
+            _isCancelledToken.Cancel();
+            _isCancelledToken.Dispose();
             Program.NetworkClient.OnMessageReceived -= NetworkClient_OnMessageReceived;
             Program.NetworkClient.OnHistoryReceived -= NetworkClient_OnHistoryReceived;
         }

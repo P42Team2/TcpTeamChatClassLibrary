@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace TcpTeamChatClassLibrary.Models
@@ -44,12 +45,7 @@ namespace TcpTeamChatClassLibrary.Models
         public ICollection<Contact> OwnContacts { get; set; } = new List<Contact>();
         public ICollection<Contact> AddedToContacts { get; set; } = new List<Contact>();
 
-        public IList<Message> SentMessages { get; set; } = new List<Message>();
-        public IList<Message> ReceivedMessages { get; set; } = new List<Message>();
-
         public DateTime CreatedAt { get; private set; }
-
-
 
         private static string GetHash(string password)
         {

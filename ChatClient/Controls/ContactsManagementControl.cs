@@ -21,13 +21,15 @@ namespace ChatClient.Controls
             _mainForm = mainForm;
 
             Program.NetworkClient.OnContactsReceived += NetworkClient_OnContactsReceived;
-            Program.NetworkClient.LoadContactsList();
 
             lvContacts.View = View.Details;
 
-            lvContacts.Columns.Add("Nickname", 150);
-            lvContacts.Columns.Add("Login", 150);
+            lvContacts.Columns.Add("Id", 35);
+            lvContacts.Columns.Add("Nickname", 120);
+            lvContacts.Columns.Add("Login", 100);
             lvContacts.Columns.Add("Last seen", 120);
+            
+            _ = Task.Run(async () => { await Task.Delay(500); Program.NetworkClient.LoadContactsList(); });
         }
 
         private void ContactsManagementControl_Disposed(object sender, EventArgs e)
@@ -35,13 +37,13 @@ namespace ChatClient.Controls
             Program.NetworkClient.OnContactsReceived -= NetworkClient_OnContactsReceived;
         }
 
-        private async void txtSearchContact_TextChanged(object sender, EventArgs e)
+        private void txtSearchContact_TextChanged(object sender, EventArgs e)
         {
             string query = txtSearch.Text.Trim();
 
             if (query.Length >= 2)
             {
-                await Program.NetworkClient.SearchContacts(query);
+                Task.Run(() => Program.NetworkClient.SearchContacts(query));
             }
         }
 
@@ -55,7 +57,8 @@ namespace ChatClient.Controls
 
                 foreach (var user in users)
                 {
-                    ListViewItem item = new ListViewItem(user.Nickname);
+                    ListViewItem item = new ListViewItem(user.Id.ToString());
+                    item.SubItems.Add(user.Nickname);
                     item.SubItems.Add(user.Login);
                     if (user.Status == UserStatus.Online)
                     {
@@ -156,6 +159,15 @@ namespace ChatClient.Controls
         private void lvContacts_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnToChat_Click(object sender, EventArgs e)
+        {
+            if (lvContacts.SelectedItems.Count > 0)
+            {
+                User selectedUser = (User)lvContacts.SelectedItems[0].Tag;
+                _mainForm.SwitchScreen(new ContactLogControl(_mainForm, selectedUser.Id));
+            }
         }
     }
 }

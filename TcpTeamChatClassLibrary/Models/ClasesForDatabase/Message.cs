@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace TcpTeamChatClassLibrary.Models
@@ -15,13 +16,12 @@ namespace TcpTeamChatClassLibrary.Models
 
 
         // тут все понятно
-        public User Sender { get; set; } = default!;
         public int SenderId { get; set; }
         public DateTime TimeWhenMessageSended { get; set; }
 
         public int ReceiverId { get; set; }
-        public User Receiver { get; set; } = default!;
 
+        [JsonIgnore]
         public Contact Contact { get; set; } = default!;
         public int ContactId { get; set; }
         /*

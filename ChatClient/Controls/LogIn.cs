@@ -22,7 +22,7 @@ namespace ChatClient.Controls
             Program.NetworkClient.OnLoginResult += NetworkClient_OnLoginResult;
         }
 
-        private void btnLogIn_Click(object sender, EventArgs e)
+        private async void btnLogIn_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text;
@@ -33,7 +33,7 @@ namespace ChatClient.Controls
                 return;
             }
 
-            Program.NetworkClient.Login(username, password);
+            await Program.NetworkClient.Login(username, password);
         }
 
         private void NetworkClient_OnLoginResult(bool success, string message)
