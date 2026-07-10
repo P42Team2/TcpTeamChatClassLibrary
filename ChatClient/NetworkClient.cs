@@ -410,7 +410,7 @@ namespace ChatClient
         }
         public void AddContact(int targetUserId) 
         {
-            if (!SendRequest("AddContact", new { TargetUserId = targetUserId }))
+            if (!SendRequest("AddContact", new { Id = targetUserId }))
                 OnContactAddedResult?.Invoke(false, "Нет соединения с сервером.");
         }
         public void DeleteContact(int targetUserId) 

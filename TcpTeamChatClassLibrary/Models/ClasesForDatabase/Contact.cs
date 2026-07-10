@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace TcpTeamChatClassLibrary.Models
@@ -12,9 +13,11 @@ namespace TcpTeamChatClassLibrary.Models
         public int Id { get; set; }
 
         public int ContactUserId { get; set; }
+        [JsonIgnore]
         public User ContactUser { get; set; } = default!;
 
         public int OwnerUserId { get; set; }
+        [JsonIgnore]
         public User OwnerUser { get; set; } = default!;
 
         public string? DisplayName { get; set; }

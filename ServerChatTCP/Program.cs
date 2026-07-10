@@ -22,7 +22,7 @@ namespace Server
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
-        private static Logger _logInfo = new LoggerConfiguration()
+        private static Logger _logInfo = new LoggerConfiguration().MinimumLevel.Debug()
             .WriteTo.Console()
             .WriteTo.File(
                 "logs/infolog/app-.txt",
@@ -276,7 +276,10 @@ namespace Server
                                         context.Contacts.Add(contact);
                                         context.SaveChanges();
                                     }
-                                    writer.WriteLine(JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions));
+                                    string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, contact, _jsonOptions), _jsonOptions);
+                                    writer.WriteLine(jsonResponse);
+                                    _logInfo.Debug(jsonResponse);
+                                    _logInfo.Information("Succes add contact request\n");
                                     break;
                                 }
 
@@ -379,20 +382,30 @@ namespace Server
                                     {
                                         break;
                                     }
+
+                                    _logInfo.Debug(contactName);
+
                                     List<User> users = new List<User>();
                                     foreach (User user in context.Users)
                                     {
                                         if(users.Count >= 10) { break; }
 
-                                        if (Regex.IsMatch(user.Login, "^" + Regex.Escape(contactName)) && user.Id != currentUserId)
+                                        if (Regex.IsMatch(user.Login, "^" + Regex.Escape(contactName)))
                                         {
-                                            users.Add(user);
+                                            if (user.Id != currentUserId)
+                                            {
+                                                users.Add(user);
+                                            }
                                         }
                                     }
                                     string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, users, _jsonOptions), _jsonOptions);
                                     writer.WriteLine(jsonResponse);
-                                    _logInfo.Information(contactName);
-                                    _logInfo.Information(jsonResponse);
+                                    _logInfo.Debug(jsonResponse);
+                                    if (users.Count == 0)
+                                    {
+                                        _logInfo.Information("Such users do not exist.\n");
+                                        break;
+                                    }
                                     _logInfo.Information("Succes search contacts request\n");
                                     break;
                                 }
@@ -404,12 +417,12 @@ namespace Server
                                 break;
                             case RequestType.LoadContactsList:
                                 {
-                                    _logInfo.Information("Load contacts list payload reqest");
+                                    _logInfo.Information("Load contacts list reqest");
                                     break;
                                 }
                             case RequestType.LoadChatsList:
                                 {
-                                    _logInfo.Information("Load chats list payload reqest");
+                                    _logInfo.Information("Load chats list reqest");
                                     break;
                                 }
                             default:
