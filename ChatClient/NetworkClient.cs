@@ -227,7 +227,7 @@ namespace ChatClient
             }
         }
 
-        public async void Login(string username, string password)
+        public async Task Login(string username, string password)
         {
             if (!SendRequest("Login", new { Username = username, Password = password }))
                 OnLoginResult?.Invoke(false, "Нет соединения с сервером.");
@@ -281,7 +281,7 @@ namespace ChatClient
             }
         }
 
-        public async void Register(string username, string password)
+        public async Task Register(string username, string password)
         {
             if (!SendRequest("Register", new { Username = username, Password = password }))
                 OnRegisterResult?.Invoke(false, "Нет соединения с сервером.");
@@ -360,7 +360,7 @@ namespace ChatClient
         }
 
         // Contacts Management
-        public void SearchContacts(string usernameQuery)
+        public async Task SearchContacts(string usernameQuery)
         {
             if (string.IsNullOrWhiteSpace(usernameQuery))
             {
@@ -368,8 +368,45 @@ namespace ChatClient
                 return;
             }
 
-            if (!SendRequest("SearchContacts", new { UsernameQuery = usernameQuery }))
+            if (!SendRequest("SearchContacts", usernameQuery ))
                 OnContactsReceived?.Invoke(new List<User>());
+            else
+            {
+                string? json = await _reader.ReadLineAsync();
+
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    OnContactsReceived?.Invoke(new List<User>());
+                    return;
+                }
+                NetworkResponse? response = JsonSerializer.Deserialize<NetworkResponse>(json, _jsonOptions);
+                List<User>? users = null;
+                if (response == null)
+                {
+                    OnContactsReceived?.Invoke(new List<User>());
+                    return;
+                }
+
+                switch (response.Type)
+                {
+                    case ResponseType.SuccessContactRequest:
+                        {
+                            users = response.Payload.Deserialize<List<User>>(_jsonOptions);
+                            if(users == null)
+                                users = new List<User>();
+                            break;
+                        }
+
+                    case ResponseType.UnexpectedError:
+                        {
+                            string? message = response.Payload.Deserialize<string>(_jsonOptions);
+                            OnContactsReceived?.Invoke(new List<User>());
+                            return;
+                        }
+                }
+                OnContactsReceived?.Invoke(users!);
+
+            }
         }
         public void AddContact(int targetUserId) 
         {

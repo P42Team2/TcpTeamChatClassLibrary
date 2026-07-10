@@ -22,7 +22,11 @@ namespace TcpTeamChatClassLibrary.Models.NetworkMessage
         LoadChatHistory,
         CreateGroupChat,
         SearchInChat,
-        GlobalMessageSearch
+        GlobalMessageSearch,
+        // new
+        LoadChatsList,
+        LoadContactsList,
+        LoadContactHistory
     }
 
     public class NetworkRequest

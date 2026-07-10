@@ -29,13 +29,13 @@ namespace ChatClient.Controls
             Program.NetworkClient.OnContactsReceived -= NetworkClient_OnContactsReceived;
         }
 
-        private void txtSearchContact_TextChanged(object sender, EventArgs e)
+        private async void txtSearchContact_TextChanged(object sender, EventArgs e)
         {
             string query = txtSearch.Text.Trim();
 
             if (query.Length >= 2)
             {
-                Program.NetworkClient.SearchContacts(query);
+                await Program.NetworkClient.SearchContacts(query);
             }
         }
 

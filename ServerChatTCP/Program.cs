@@ -3,11 +3,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using TcpTeamChatClassLibrary.Models.DTO;
-using TcpTeamChatClassLibrary.Models.NetworkMessage;
-using TcpTeamChatClassLibrary.Models;
+using System.Text.RegularExpressions;
 using Serilog;
 using Serilog.Core;
+using TcpTeamChatClassLibrary.Models;
+using TcpTeamChatClassLibrary.Models.DTO;
+using TcpTeamChatClassLibrary.Models.NetworkMessage;
 
 namespace Server
 {
@@ -85,7 +86,7 @@ namespace Server
                         {
                             _logWarring.Fatal("Unknown request\n" +
                                 "Request type: "+requestTypeStr+
-                                "Payload: "+payloadStr+"\n");
+                                "\nPayload: "+payloadStr+"\n");
                             continue;
                         }
 
@@ -349,19 +350,68 @@ namespace Server
                                         break;
                                     }
                                 }
+                            case RequestType.LoadContactHistory:
+                                {
+                                    _logInfo.Information("Load history request\n");
+                                    int contactId = JsonSerializer.Deserialize<int>(clientRequest.Payload, _jsonOptions);
+                                    if (context.Contacts.Any(c => c.Id == contactId))
+                                    {
+                                        Message[] chatHistory = context.Contacts.First(c => c.Id == contactId).Messages.ToArray();
+                                        writer.WriteLine(JsonSerializer.Serialize(chatHistory, _jsonOptions));
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "A contact with this id does not exist.", _jsonOptions);
+                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
+                                        break;
+                                    }
+                                }
 
                             case RequestType.CreateGroupChat:
                                 _logInfo.Information("Create group request\n");
                                 break;
                             case RequestType.SearchContacts:
-                                _logInfo.Information("Search contacts request\n");
-                                break;
+                                {
+                                    _logInfo.Information("Search contacts request\n");
+                                    string? contactName = JsonSerializer.Deserialize<string>(clientRequest.Payload, _jsonOptions);
+                                    if (contactName == null)
+                                    {
+                                        break;
+                                    }
+                                    List<User> users = new List<User>();
+                                    foreach (User user in context.Users)
+                                    {
+                                        if(users.Count >= 10) { break; }
+
+                                        if (Regex.IsMatch(user.Login, "^" + Regex.Escape(contactName)))
+                                        {
+                                            users.Add(user);
+                                        }
+                                    }
+                                    string jsonResponse = JsonSerializer.Serialize(new NetworkResponse(ResponseType.SuccessContactRequest, users, _jsonOptions), _jsonOptions);
+                                    writer.WriteLine(jsonResponse);
+                                    _logInfo.Information(contactName);
+                                    _logInfo.Information(jsonResponse);
+                                    _logInfo.Information("Succes search contacts request\n");
+                                    break;
+                                }
                             case RequestType.SearchInChat:
                                 _logInfo.Information("Search in chat request\n");
                                 break;
                             case RequestType.GlobalMessageSearch:
                                 _logInfo.Information("Global search request\n");
                                 break;
+                            case RequestType.LoadContactsList:
+                                {
+                                    _logInfo.Information("Load contacts list payload reqest");
+                                    break;
+                                }
+                            case RequestType.LoadChatsList:
+                                {
+                                    _logInfo.Information("Load chats list payload reqest");
+                                    break;
+                                }
                             default:
                                 _logWarring.Fatal("Unknown request\n" +
                                     "Невідомими чином воно пройшло через перевірку\n" +
@@ -384,7 +434,9 @@ namespace Server
                     onlineUsers.TryRemove(currentUserId, out _);
                     lock (_lock)
                     {
-                        context.Users.First(u => u.Id == currentUserId).Status = UserStatus.Offline;
+                        User current = context.Users.First(u => u.Id == currentUserId);
+                        current.Status = UserStatus.Offline;
+                        current.LastSeen = DateTime.UtcNow;
                         context.SaveChanges();
                     }
                 }
