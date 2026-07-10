@@ -384,7 +384,7 @@ namespace Server
                                     {
                                         if(users.Count >= 10) { break; }
 
-                                        if (Regex.IsMatch(user.Login, "^" + Regex.Escape(contactName)))
+                                        if (Regex.IsMatch(user.Login, "^" + Regex.Escape(contactName)) && user.Id != currentUserId)
                                         {
                                             users.Add(user);
                                         }

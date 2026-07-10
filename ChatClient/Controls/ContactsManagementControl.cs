@@ -48,6 +48,16 @@ namespace ChatClient.Controls
                 foreach (var user in users)
                 {
                     ListViewItem item = new ListViewItem(user.Nickname);
+                    item.SubItems.Add(user.Login);
+                    if (user.Status == UserStatus.Online)
+                    {
+                        item.SubItems.Add(user.Status.ToString());
+                    }
+                    else
+                    {
+                        item.SubItems.Add(user.LastSeen.ToString());
+                    }
+
                     item.Tag = user;
                     lvContacts.Items.Add(item);
                 }
@@ -124,6 +134,11 @@ namespace ChatClient.Controls
         }
 
         private void ContactsManagementControl_Disposed(object sender, ControlEventArgs e)
+        {
+
+        }
+
+        private void lvContacts_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
