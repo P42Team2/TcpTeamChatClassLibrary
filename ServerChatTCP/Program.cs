@@ -10,7 +10,7 @@ using Serilog.Core;
 using TcpTeamChatClassLibrary.Models;
 using TcpTeamChatClassLibrary.Models.DTO;
 using TcpTeamChatClassLibrary.Models.NetworkMessage;
-
+//Якщо зможете то бажано відкривати на різних комп'ютерах
 namespace Server
 {
     internal class Program
