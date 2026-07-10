@@ -577,7 +577,7 @@ namespace ChatClient
             return new List<T>();
         }
 
-        public void AddContactByNickname(string targetUsername)
+        public async void AddContactByNickname(string targetUsername)
         {
             if (string.IsNullOrEmpty(targetUsername)) return;
 
@@ -606,7 +606,7 @@ namespace ChatClient
 
             OnContactsReceived += temporaryHandler;
 
-            SearchContacts(targetUsername);
+            await SearchContacts(targetUsername);
         }
     }
 }

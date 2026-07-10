@@ -22,6 +22,12 @@ namespace ChatClient.Controls
 
             Program.NetworkClient.OnContactsReceived += NetworkClient_OnContactsReceived;
             Program.NetworkClient.LoadContactsList();
+
+            lvContacts.View = View.Details;
+
+            lvContacts.Columns.Add("Nickname", 150);
+            lvContacts.Columns.Add("Login", 150);
+            lvContacts.Columns.Add("Last seen", 120);
         }
 
         private void ContactsManagementControl_Disposed(object sender, EventArgs e)
@@ -45,6 +51,8 @@ namespace ChatClient.Controls
             {
                 lvContacts.Items.Clear();
 
+                DateTime today = DateTime.Today;
+
                 foreach (var user in users)
                 {
                     ListViewItem item = new ListViewItem(user.Nickname);
@@ -55,7 +63,14 @@ namespace ChatClient.Controls
                     }
                     else
                     {
-                        item.SubItems.Add(user.LastSeen.ToString());
+                        if (user.LastSeen.Date == today)
+                        {
+                            item.SubItems.Add(user.LastSeen.ToString("HH:mm"));
+                        }
+                        else
+                        {
+                            item.SubItems.Add(user.LastSeen.ToString("dd.MM.yyyy"));
+                        }
                     }
 
                     item.Tag = user;
