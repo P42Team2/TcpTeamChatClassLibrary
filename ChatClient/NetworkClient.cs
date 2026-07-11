@@ -688,7 +688,7 @@ namespace ChatClient
                 else
                 {
                     // не нашли
-                    Console.WriteLine($"Пользователь {targetUsername} не найден в базе.");
+                    _log.Debug($"Пользователь {targetUsername} не найден в базе.");
                 }
 
                 // отписываемся от ивента, чтобы этот код сработал только ОДИН раз

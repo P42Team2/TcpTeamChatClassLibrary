@@ -26,7 +26,11 @@ namespace TcpTeamChatClassLibrary.Models
         public string Password
         {
             get => _hashPassword;
-            set => _hashPassword = GetHash(value);
+            init => _hashPassword = value;
+        }
+        public void SetPassword(string password)
+        {
+            _hashPassword = GetHash(password);
         }
         public bool VerifyPassword(string password)
         {

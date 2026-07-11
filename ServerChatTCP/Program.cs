@@ -115,13 +115,13 @@ namespace Server
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
-                                    else if (acountUser.VerifyPassword(dataLogin.Password))
+                                    else if (!acountUser.VerifyPassword(dataLogin.Password))
                                     {
                                         var errorResponse = new NetworkResponse(ResponseType.LoginError, "Uncorrect Password.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
-
+                                    //_logInfo.Debug(dataLogin.Password);
                                     currentUserId = acountUser.Id;
                                     lock (_lock)
                                     {
@@ -158,11 +158,12 @@ namespace Server
                                     acountUser = new User
                                     {
                                         Login = dataRegister.Username,
-                                        Password = dataRegister.Password,
+                                        //Password = dataRegister.Password,
                                         Status = UserStatus.Online,
                                         LastSeen = DateTime.Now,
                                         Nickname = dataRegister.Username
                                     };
+                                    acountUser.SetPassword(dataRegister.Password);
                                     lock (_lock)
                                     {
                                         context.Users.Add(acountUser);
@@ -251,9 +252,10 @@ namespace Server
                                     {
                                         /*
                                         var errorResponse = new NetworkResponse(ResponseType.UnexpectedError, "uncorrect payload", _jsonOptions);
-                                        _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. \n client request: {Payload} \n request: id {Id} | login {Login}\n", clientRequest.Payload, request?.Id, request?.Login);
-                                        writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         */
+                                        _logWarring.Fatal("Error in RequestType.AddContact. Uncorrect payload. \n client request: {Payload} \n request: id {Id} | login {Login}\n", clientRequest.Payload, request?.Id, request?.Login);
+                                        
+                                        //writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         break;
                                     }
 
@@ -263,6 +265,7 @@ namespace Server
                                         var errorResponse = new NetworkResponse(ResponseType.UserDoesNotExist, "An account with this login/id does not exist.", _jsonOptions);
                                         writer.WriteLine(JsonSerializer.Serialize(errorResponse, _jsonOptions));
                                         */
+                                        _logWarring.Fatal("userContact == null");
                                         break;
                                     }
 
