@@ -513,7 +513,8 @@ namespace Server
                                         context.Messages.Add(message2);
                                         context.SaveChanges();
                                     }
-
+                                    _logInfo.Information("Succes send message to contact request\n");
+                                    /*
                                     if (onlineUsers.TryGetValue(msg.ReceiverId, out TcpClient? receiverClient))
                                     {
                                         try
@@ -521,11 +522,12 @@ namespace Server
                                             NetworkStream nsReceiver = receiverClient.GetStream();
                                             StreamWriter writerReceiver = new StreamWriter(nsReceiver);
                                             writerReceiver.AutoFlush = true;
-
+                                            
                                             var response = new NetworkResponse(ResponseType.MessageReceived, message1, _jsonOptions);
                                             string json = JsonSerializer.Serialize(response, _jsonOptions);
                                             writerReceiver.WriteLine(json);
                                             _logInfo.Information("Message sent instantly to online user\n");
+                                           
                                         }
                                         catch (Exception ex)
                                         {
@@ -536,6 +538,7 @@ namespace Server
                                     {
                                         _logInfo.Information("User offline (только сохранено в бд)\n");
                                     }
+                                    */
                                     break;
                                 }
                             
